@@ -1,0 +1,10 @@
+{
+    "format": "csv",
+    "connection": "Driver={PostgreSQL UNICODE};Server=localhost;Port=15432;Database=gateway;Uid=postgres;Pwd=postgres",
+    "sql": [
+        "SELECT country_code AS Code, country_name AS Name FROM gateway_country ORDER BY country_name;"
+    ],
+    "headings": ["Countries"],
+    "field_delimiter": ";",
+    "string_delimiter": "\""
+}

@@ -1,0 +1,9 @@
+{
+    "environment": "~/.db_report/venv",
+    "locale_domain": "db_report",
+    "packages": "lib/python{VERSION}/site-packages",
+    "language": "en",
+    "locale_dir": "~/.db_report/locale",
+    "log_file": "~/.db_report/report.log",
+    "log_format": "%(levelname)-10s|%(asctime)s| %(name)s --- %(message)s (%(filename)s:%(lineno)d)"
+}

@@ -1,0 +1,10 @@
+{
+    "format": "csv",
+    "connection": "Driver=psycopg2; host=localhost; port=15432; dbname=gateway; user=postgres; password=postgres",
+    "sql": [
+        "SELECT country_code AS Code, country_name AS Name FROM gateway_country ORDER BY country_name;"
+    ],
+    "headings": ["Countries"],
+    "field_delimiter": ";",
+    "string_delimiter": "\""
+}
