@@ -1,0 +1,7 @@
+{
+    "format": "csv",
+    "connection": "Driver=libsqlite3odbc-0.9995.so;Database=/home/oleg/PycharmProjects/test_download/bad_files.db",
+    "sql": "SELECT * FROM files WHERE substreams > {substreams} and tags like '%{tag}%'",
+    "field_delimiter": ";",
+    "string_delimiter": "\""
+}

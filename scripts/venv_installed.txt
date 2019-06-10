@@ -1,0 +1,7 @@
+Package       Version
+------------- -------
+pip           19.0.3 
+pkg-resources 0.0.0  
+pyodbc        4.0.26 
+setuptools    40.8.0 
+wheel         0.33.4 
