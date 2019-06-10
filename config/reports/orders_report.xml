@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='utf-8'?>
+<book>
+    <report>
+        <name>$_title_0</name>
+        <styledef name="Subheaders">
+            font: bold True; alignment: horiz centre;
+            borders: left 1, top 1, bottom 1, right 1;
+        </styledef>
+        <styledef name="Fields">borders: left 1, top 1, bottom 1, right 1;</styledef>
+        <styledef name="Headers">font: bold True;</styledef>
+        <literal col="0" row="1" stylename="Subheaders">Order</literal>
+        <literal col="1" row="1" stylename="Subheaders">Card</literal>
+        <literal col="2" row="1" stylename="Subheaders">Brand</literal>
+        <literal col="3" row="1" stylename="Subheaders">Status</literal>
+        <literal col="4" row="1" stylename="Subheaders">Currency</literal>
+        <literal col="5" row="1" stylename="Subheaders">Date&amp;Time</literal>
+        <literal col="6" row="1" stylename="Subheaders">Account</literal>
+        <literal col="7" row="1" stylename="Subheaders">Client</literal>
+        <literal col="8" row="1" stylename="Subheaders">Country</literal>
+        <literal col="9" row="1" stylename="Subheaders">Bank</literal>
+        <sql>
+            <request>
+                SET TIME ZONE 0;
+                SELECT
+                    gateway_moneyorder.order_id AS "Id",
+                    gateway_moneyorder.card_four AS "Card",
+                    gateway_cardbrand.nominal AS "Brand",
+                    gateway_orderstatus.status_name AS "Status",
+                    gateway_currency.three AS "Currency",
+                    gateway_moneyorder.order_datetime::text AS "Date&amp;Time",
+                    gateway_subaccount.nominal AS "Account",
+                    gateway_client.nominal AS "Client",
+                    gateway_country.two_letters AS "Client country",
+                    gateway_country.two_letters AS "Bank country"
+                FROM
+                    public.gateway_moneyorder,
+                    public.gateway_cardbrand,
+                    public.gateway_orderstatus,
+                    public.gateway_currency,
+                    public.gateway_subaccount,
+                    public.gateway_client,
+                    public.gateway_country,
+                    public.gateway_country as bank_country
+                WHERE
+                    gateway_moneyorder.card_type_id = gateway_cardbrand.code AND
+                    gateway_moneyorder.order_status_id = gateway_orderstatus.status_code AND
+                    gateway_moneyorder.currency_id = gateway_currency.code AND
+                    gateway_moneyorder.cust_account_id = gateway_subaccount.unikey AND
+                    gateway_moneyorder.client_country_id = gateway_country.country_code AND
+                    gateway_moneyorder.bank_country_id = bank_country.country_code AND
+                    gateway_subaccount.client_id = gateway_client.unikey AND
+                    gateway_moneyorder.order_datetime::date &gt;= '$_parm_from_date' AND
+                    gateway_moneyorder.order_datetime::date &lt;= '$_parm_to_date' AND
+                    (gateway_moneyorder.cust_account_id = $_parm_account OR $_parm_account = 0) AND
+                    (gateway_moneyorder.client_id_id = $_parm_client OR $_parm_client = 0)
+                ORDER BY
+                    gateway_moneyorder.order_number DESC;
+            </request>
+            <group step="1">
+                <field col="0" name="Order" header="no" row="2" format="General" stylename="Fields"/>
+                <field col="1" name="Card" header="no" row="2" stylename="Fields"/>
+                <field col="2" name="Brand" header="no" row="2" stylename="Fields"/>
+                <field col="3" name="Status" header="no" row="2" stylename="Fields"/>
+                <field col="4" name="Currency" header="no" row="2" stylename="Fields"/>
+                <field col="5" name="Date&amp;time" header="no" row="2" width="7500" stylename="Fields"/>
+                <field col="6" name="Account" header="no" row="2" stylename="Fields"/>
+                <field col="7" name="Client" header="no" row="2" stylename="Fields"/>
+                <field col="8" name="Client country" header="no" row="2" stylename="Fields"/>
+                <field col="9" name="Bank country" header="no" row="2" stylename="Fields"/>
+            </group>
+        </sql>
+    </report>
+</book>
