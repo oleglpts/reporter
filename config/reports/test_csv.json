@@ -4,8 +4,7 @@
     "sql": [
         "SELECT * FROM files WHERE substreams > {substreams} and tags like '%{tag}%'",
         "SKIP=2",
-        "SKIP",
-        "SELECT * FROM files"
+        "SELECT * FROM files WHERE size > {size}"
     ],
     "field_delimiter": ";",
     "string_delimiter": "\""

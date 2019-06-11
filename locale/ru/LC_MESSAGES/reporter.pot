@@ -19,6 +19,10 @@ msgstr ""
 msgid "activated virtual environment"
 msgstr "виртуальное окружение активизировано"
 
+#: formats/csv.py:29
+msgid "executing"
+msgstr "выполняется"
+
 #: reporter.py:16
 msgid "reporter started"
 msgstr "старт генератора"
@@ -42,3 +46,4 @@ msgstr "ошибка"
 #: utils/helpers.py:172
 msgid "error termination"
 msgstr "завершение по ошибке"
+

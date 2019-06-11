@@ -1,0 +1,4 @@
+{
+    "format": "xls",
+    "connection": "Driver=libsqlite3odbc-0.9995.so;Database=/home/oleg/PycharmProjects/test_download/bad_files.db",
+}
