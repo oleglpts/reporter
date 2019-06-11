@@ -1,10 +1,8 @@
 {
     "format": "csv",
-    "connection": "Driver=libsqlite3odbc-0.9995.so;Database=/home/oleg/PycharmProjects/test_download/bad_files.db",
+    "connection": "Driver=libsqlite3odbc-0.9995.so;Database=/home/oleg/PycharmProjects/reporter/chinook.sqlite",
     "sql": [
-        "SELECT * FROM files WHERE substreams > {substreams} and tags like '%{tag}%'",
-        "SKIP=2",
-        "SELECT * FROM files WHERE size > {size}"
+        "SELECT b.name as Artist, a.Title as Album FROM Album a JOIN Artist b ON(b.ArtistId = a.ArtistId) WHERE Artist LIKE '%{{artist}}%' ORDER BY Artist, Title"
     ],
     "field_delimiter": ";",
     "string_delimiter": "\""

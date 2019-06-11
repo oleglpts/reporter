@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-06-10 15:10+IDT\n"
+"POT-Creation-Date: 2019-06-11 13:12+IDT\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,33 +17,36 @@ msgstr ""
 
 #: config/__init__.py:42
 msgid "activated virtual environment"
-msgstr "виртуальное окружение активизировано"
+msgstr "активизирована виртуальная среда"
 
-#: formats/csv.py:29
-msgid "executing"
-msgstr "выполняется"
+#: formats/csv.py:17 formats/xls.py:18
+msgid "generator"
+msgstr "генератор"
+
+#: formats/csv.py:17 formats/xls.py:18
+msgid "working"
+msgstr "работает"
 
 #: reporter.py:16
 msgid "reporter started"
-msgstr "старт генератора"
+msgstr "генератор стартовал"
 
 #: reporter.py:17
 msgid "report name"
 msgstr "имя отчёта"
 
-#: reporter.py:35
+#: reporter.py:23
 msgid "output file"
 msgstr "выходной файл"
 
-#: reporter.py:36
+#: reporter.py:24
 msgid "reporter ended"
 msgstr "генератор завершил работу"
 
-#: utils/helpers.py:167 utils/helpers.py:170
+#: utils/helpers.py:169 utils/helpers.py:172
 msgid "error"
 msgstr "ошибка"
 
-#: utils/helpers.py:172
+#: utils/helpers.py:174
 msgid "error termination"
 msgstr "завершение по ошибке"
-

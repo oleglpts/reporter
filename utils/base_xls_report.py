@@ -5,8 +5,7 @@ import abc
 import xlwt
 import psycopg2
 from xlwt.Style import XFStyle
-
-from gateway.reports.helpers.base_xml import BaseXML
+from utils.base_xml import BaseXML
 
 """
 
@@ -209,19 +208,7 @@ class BaseXLSReport(BaseXML):
         self._max = -1                                      # максимальный номер строки относительно начала отчёта
         self._field = 0                                     # текущее поле SQL-запроса
         BaseXML.__init__(self, param)                       # вызвать конструктор родителя
-        try:                                                # пробуем
-            self._conn = psycopg2.connect(                  # делаем
-                host=param['host'], port=param['port'],     # попытку
-                dbname=param['database'],                   # соединиться
-                user=param['user'],                         # с указанной
-                password=param['password']                  # базой
-            )                                               # данных
-        except psycopg2.Error as e:                         # ошибка соединения с БД
-            print("Database error: %s" % e.pgerror)         # неверная
-            exit(1)                                         # строка соединения
-        except KeyError as e:                               # список параметров
-            print("Key Error: %s not found" % str(e))       # не содержит
-            exit(1)                                         # нужного значения
+        self._conn = param['cursor']                        # курсор базы данных
 
     """
 
@@ -321,15 +308,14 @@ class BaseXLSReport(BaseXML):
         :param xml: XML-строка
         :type xml: str
         :param parm: параметр командной строки
-        :type parm: list
+        :type parm: str
         :param name: имя специальной переменной без номера
         :type name str
         :return: изменённая XML-строка после подстановки
         :rtype: str
+
         """
-        for key in parm:
-            xml = xml.replace('%s_%s' % (name, key), parm[key])
-        return xml
+        return xml.replace('{{%s}}' % name, parm)
 
     """
 

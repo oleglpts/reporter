@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8'?>
+<book>
+    <report>
+        <name>{{title}}</name>
+        <styledef name="Subheaders">
+            font: bold True; alignment: horiz centre;
+            borders: left 1, top 1, bottom 1, right 1;
+        </styledef>
+        <styledef name="Fields">borders: left 1, top 1, bottom 1, right 1;</styledef>
+        <styledef name="Headers">font: bold True;</styledef>
+        <literal col="0" row="1" stylename="Subheaders">Artist</literal>
+        <literal col="1" row="1" stylename="Subheaders">Album</literal>
+        <sql>
+            <request>
+                SELECT b.name as Artist, a.Title as Album
+                    FROM Album a JOIN Artist b ON(b.ArtistId = a.ArtistId)
+                    WHERE Artist LIKE '%{{artist}}%'
+                    ORDER BY Artist, Title
+            </request>
+            <group step="1">
+                <field col="0" name="Artist" header="no" row="2" format="General" width="20000" stylename="Fields"/>
+                <field col="1" name="Album" header="no" row="2" width="20100" stylename="Fields"/>
+            </group>
+        </sql>
+    </report>
+</book>

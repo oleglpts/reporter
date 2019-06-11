@@ -3,7 +3,7 @@
 import xlwt
 import psycopg2
 
-from gateway.reports.helpers.base_xls_report import BaseXLSReport
+from utils.base_xls_report import BaseXLSReport
 
 """
 
@@ -51,10 +51,7 @@ class XLSReport(BaseXLSReport):
         Установка параметров, подставляемых
         из командной строки
         """
-        self._parameters = {
-            "$_parm": self._param['sql'],                   # словарь замены параметров
-            "$_title": self._param['title']                 # с помощью командной строки
-        }
+        self._parameters = self._param['parameters']
 
     """
 
@@ -182,16 +179,14 @@ class XLSReport(BaseXLSReport):
         :param node: элемент дерева разбора, содержащий тег
         :type node: _Element
         """
-        cur = self._conn.cursor()                           # сформировать
         request = node.text                                 # запрос
-        # TODO: проверить запрос на опасный контент?
         try:                                                # пробуем
-            cur.execute(request)                            # выполнить запрос
+            self._conn.execute(request)                     # выполнить запрос
         except psycopg2.Error as e:                         # похоже
             print("Hint: incorrect --sql-parameter?")       # на ошибку,
             print("Database error: %s" % str(e))            # обработать
             exit(1)                                         # и выйьт
-        self._rows = cur.fetchall()                         # вытащить результат
+        self._rows = self._conn.fetchall()                  # вытащить результат
         if len(self._rows) > self._rows_max:                # скорректировать
             self._rows_max = len(self._rows)                # максимльное количество
 

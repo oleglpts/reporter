@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./reporter.py -p substreams=100, tag=JavaScript, size=5000
+./reporter.py -p artist="Symphony Orchestra", title=Albums -n test_$1

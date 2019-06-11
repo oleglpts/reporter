@@ -14,6 +14,7 @@ def csv(report_config):
 
     connect = database_connect(report_config['connection'], logger)
     cursor = connect.cursor()
+    logger.info('%s csv-%s' % (_('working'), _('generator')))
     with open('%s.csv' % cmd_args.output, 'w') as f:
         for sql in report_config['sql']:
             if sql.startswith('SKIP'):
@@ -25,8 +26,7 @@ def csv(report_config):
                     parm.split('=')[0]: parm.split('=')[1].replace(',', '') for parm in cmd_args.parameters
                 }
                 for parameter in parameters_list:
-                    sql = sql.replace('{%s}' % parameter, parameters_list[parameter])
-                logger.info('%s SQL: "%s"' % (_('executing'), sql))
+                    sql = sql.replace('{{%s}}' % parameter, parameters_list[parameter])
                 cursor.execute(sql)
                 data, description = cursor.fetchall(), cursor.description
             description_string = ''
