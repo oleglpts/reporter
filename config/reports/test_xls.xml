@@ -10,7 +10,7 @@
             font: bold True;
         </styledef>
         <styledef name="Fields">borders: left 1, top 1, bottom 1, right 1;</styledef>
-        <styledef name="Headers">font: bold True;</styledef>
+        <styledef name="Headers">font: bold True; alignment: horiz centre;</styledef>
         <literal col="0" row="0" stylename="Subheaders">Last name</literal>
         <literal col="1" row="0" stylename="Subheaders">First name</literal>
         <literal col="2" row="0" stylename="Subheaders">Amount</literal>
@@ -43,12 +43,6 @@
     </report>
     <report>
         <name>{{title1}}</name>
-        <styledef name="Subheaders">
-            font: bold True; alignment: horiz centre;
-            borders: left 1, top 1, bottom 1, right 1;
-        </styledef>
-        <styledef name="Fields">borders: left 1, top 1, bottom 1, right 1;</styledef>
-        <styledef name="Headers">font: bold True;</styledef>
         <literal col="0" row="0" stylename="Subheaders">Artist</literal>
         <literal col="1" row="0" stylename="Subheaders">Album</literal>
         <sql>
@@ -61,6 +55,64 @@
                 <field col="0" name="Artist" header="no" row="1" width="20000" stylename="Fields"/>
                 <field col="1" name="Album" header="no" row="1" width="20000" stylename="Fields"/>
             </group>
+        </sql>
+    </report>
+    <report>
+        <name>{{title2}}</name>
+        <literal col="0" row="0" stylename="Headers">Report by some genres</literal>
+        <literal col="0" row="2" stylename="Headers">Media</literal>
+        <literal col="1" row="2" stylename="Headers">Genre</literal>
+        <literal col="2" row="2" stylename="Headers">Amount</literal>
+        <literal col="3" row="2" stylename="Headers">Discount</literal>
+        <literal col="4" row="2" stylename="Headers">Charged</literal>
+        <sql>
+            <request>
+                SELECT d.Name AS Media, round(sum(a.Quantity * a.UnitPrice), 2) AS Money,
+                       round(sum(a.Quantity * a.UnitPrice/50), 2) AS Discount
+                    FROM InvoiceLine AS a JOIN Track AS b ON(b.TrackId = a.TrackId) JOIN
+                         Genre AS c ON (c.GenreId = b.GenreId) JOIN MediaType as d ON (d.MediaTypeId = b.MediaTypeId)
+                    WHERE c.Name = 'Latin'
+                    GROUP BY d.Name, c.Name
+                    ORDER BY d.Name, c.Name
+            </request>
+            <group step="4">
+                <field col="0" name="Media" header="no" row="3" width="7000"/>
+                <field col="2" name="Money" header="no" row="3"/>
+                <field col="3" name="Discount" header="no" row="3"/>
+                <groupliteral col="1" name="Type" row="3" header="no" >Latin</groupliteral>
+                <formula col="4" name="Total" row="3" header="no">C{{cs}}-D{{cs}}</formula>
+            </group>
+        </sql>
+        <sql cycle="yes">
+            <request>
+                SELECT round(sum(a.Quantity * a.UnitPrice), 2) AS Money,
+                       round(sum(a.Quantity * a.UnitPrice/50), 2) AS Discount
+                    FROM InvoiceLine AS a JOIN Track AS b ON(b.TrackId = a.TrackId) JOIN
+                         Genre AS c ON (c.GenreId = b.GenreId) JOIN MediaType as d ON (d.MediaTypeId = b.MediaTypeId)
+                    WHERE c.Name = 'World'
+                    GROUP BY d.Name, c.Name
+                    ORDER BY d.Name, c.Name
+            </request>
+            <group step="4">
+                <field col="2" name="Money" header="no" row="4"/>
+                <field col="3" name="Discount" header="no" row="4"/>
+                <groupliteral col="1" name="Type" row="4" header="no" >World</groupliteral>
+                <formula col="4" name="Total" row="4" header="no">C{{cs}}-D{{cs}}</formula>
+            </group>
+        </sql>
+        <sql cycle="yes">
+            <group step="4">
+                <groupliteral col="0" name="Type" row="5" header="no" stylename="Totals">Subtotal:</groupliteral>
+                <formula col="4" name="Total" row="5" header="no" stylename="Totals">
+                    INDIRECT("E" &amp; ({{ss}}+3)) + INDIRECT("E" &amp; ({{ss}}+4))
+                </formula>
+            </group>
+        </sql>
+        <sql>
+            <literal col="0" row="0" stylename="Totals">Total:</literal>
+            <formula col="4" name="Total" row="0" header="no" stylename="Totals" format="0.00">
+                    INDIRECT("E" &amp; ({{cs}}-5)) + INDIRECT("E" &amp; ({{cs}}-1))
+            </formula>
         </sql>
     </report>
 </book>
