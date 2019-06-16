@@ -166,6 +166,7 @@ class XLSReport(BaseXLSReport):
         if self._get_attr(node, "cycle", "no") == "no":     # если запрос не циклический
             self._curr = self._max+1                        # подогнать текущую строку
         self._field = 0                                     # обнулить текущее поле
+        self._rows = [(0,)]
 
     """
 
@@ -180,15 +181,18 @@ class XLSReport(BaseXLSReport):
         :type node: _Element
         """
         request = node.text                                 # запрос
-        try:                                                # пробуем
-            self._conn.execute(request)                     # выполнить запрос
-        except psycopg2.Error as e:                         # похоже
-            print("Hint: incorrect --sql-parameter?")       # на ошибку,
-            print("Database error: %s" % str(e))            # обработать
-            exit(1)                                         # и выйьт
-        self._rows = self._conn.fetchall()                  # вытащить результат
-        if len(self._rows) > self._rows_max:                # скорректировать
-            self._rows_max = len(self._rows)                # максимльное количество
+        if request is not None:
+            try:                                                # пробуем
+                self._conn.execute(request)                     # выполнить запрос
+            except psycopg2.Error as e:                         # похоже
+                print("Hint: incorrect --sql-parameter?")       # на ошибку,
+                print("Database error: %s" % str(e))            # обработать
+                exit(1)                                         # и выйьт
+            self._rows = self._conn.fetchall()                  # вытащить результат
+            if len(self._rows) > self._rows_max:                # скорректировать
+                self._rows_max = len(self._rows)                # максимльное количество
+        else:
+            self._rows = [(0,)]
 
     """
 
@@ -262,9 +266,9 @@ class XLSReport(BaseXLSReport):
         for i in range(len(self._rows)):
             row += self._step
             formula = node.text
-            formula = formula.replace("$_cs", str(row + 1)). \
-                replace("$_ss", str(self._curr + i * self._step + 1)). \
-                replace("$_ds", str(row))
+            formula = formula.replace("{{cs}}", str(row + 1)). \
+                replace("{{ss}}", str(self._curr + i * self._step + 1)). \
+                replace("{{ds}}", str(row))
             self._ws.write(row, col, xlwt.Formula(formula), self._get_style(node))
         if row > self._max:
             self._max = row
@@ -290,9 +294,9 @@ class XLSReport(BaseXLSReport):
         for i in range(self._rows_max):
             row += self._step
             value = node.text
-            value = value.replace("$_cs", str(row + 1)). \
-                replace("$_ss", str(self._curr + i * self._step + 1)). \
-                replace("$_ds", str(row))
+            value = value.replace("{{cs}}", str(row + 1)). \
+                replace("{{ss}}", str(self._curr + i * self._step + 1)). \
+                replace("{{ds}}", str(row))
             try:
                 value = float(value)
             except ValueError:

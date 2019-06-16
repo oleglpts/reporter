@@ -2,6 +2,9 @@
 
 # Required Debian packages: build-essential unixodbc-bin unixodbc-dev libsqliteodbc and other drivers
 # See: https://github.com/mkleehammer/pyodbc/wiki/
+#
+# -n test_xls -p artist="Symphony Orchestra", title=Albums
+
 
 import json
 import importlib

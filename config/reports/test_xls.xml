@@ -1,25 +1,65 @@
 <?xml version='1.0' encoding='utf-8'?>
 <book>
     <report>
-        <name>{{title}}</name>
+        <name>{{title0}}</name>
+        <styledef name="Subheaders">
+            font: bold True; alignment: horiz centre;
+            borders: left 1, top 1, bottom 1, right 1;
+        </styledef>
+        <styledef name="Totals">
+            font: bold True;
+        </styledef>
+        <styledef name="Fields">borders: left 1, top 1, bottom 1, right 1;</styledef>
+        <styledef name="Headers">font: bold True;</styledef>
+        <literal col="0" row="0" stylename="Subheaders">Last name</literal>
+        <literal col="1" row="0" stylename="Subheaders">First name</literal>
+        <literal col="2" row="0" stylename="Subheaders">Amount</literal>
+        <literal col="3" row="0" stylename="Subheaders">Discount</literal>
+        <literal col="4" row="0" stylename="Subheaders">Total</literal>
+        <sql>
+            <request>
+                SELECT b.LastName, b.FirstName, round(sum(a.Total), 2), round(sum(a.Total)/50, 2)
+                    FROM Invoice AS a JOIN Customer AS b ON (b.CustomerId = a.CustomerId)
+                    WHERE b.LastName LIKE '%{{customer}}%'
+                    GROUP BY b.LastName, b.FirstName
+                    ORDER BY b.LastName, b.FirstName;
+            </request>
+            <group step="1">
+                <field col="0" name="Last name" header="no" row="1" stylename="Fields"/>
+                <field col="1" name="First name" header="no" row="1" stylename="Fields"/>
+                <field col="2" name="Amount" header="no" row="1" stylename="Fields"/>
+                <field col="3" name="Discount" header="no" row="1" stylename="Fields"/>
+            </group>
+            <formula col="4" name="Total" row="1" header="no" stylename="Fields" format="0.00">
+                    C{{cs}}-D{{cs}}
+            </formula>
+        </sql>
+        <sql>
+            <literal col="0" row="1" stylename="Totals">Total:</literal>
+            <formula col="4" name="Total" row="1" header="no" stylename="Totals" format="0.00">
+                    SUM(E2:E{{ds}})
+            </formula>
+        </sql>
+    </report>
+    <report>
+        <name>{{title1}}</name>
         <styledef name="Subheaders">
             font: bold True; alignment: horiz centre;
             borders: left 1, top 1, bottom 1, right 1;
         </styledef>
         <styledef name="Fields">borders: left 1, top 1, bottom 1, right 1;</styledef>
         <styledef name="Headers">font: bold True;</styledef>
-        <literal col="0" row="1" stylename="Subheaders">Artist</literal>
-        <literal col="1" row="1" stylename="Subheaders">Album</literal>
+        <literal col="0" row="0" stylename="Subheaders">Artist</literal>
+        <literal col="1" row="0" stylename="Subheaders">Album</literal>
         <sql>
             <request>
                 SELECT b.name as Artist, a.Title as Album
                     FROM Album a JOIN Artist b ON(b.ArtistId = a.ArtistId)
-                    WHERE Artist LIKE '%{{artist}}%'
-                    ORDER BY Artist, Title
+                    WHERE Artist LIKE '%{{artist}}%' ORDER BY Artist, Title;
             </request>
             <group step="1">
-                <field col="0" name="Artist" header="no" row="2" format="General" width="20000" stylename="Fields"/>
-                <field col="1" name="Album" header="no" row="2" width="20100" stylename="Fields"/>
+                <field col="0" name="Artist" header="no" row="1" width="20000" stylename="Fields"/>
+                <field col="1" name="Album" header="no" row="1" width="20000" stylename="Fields"/>
             </group>
         </sql>
     </report>

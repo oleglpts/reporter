@@ -105,3 +105,4 @@ doc/html/
 # mypy
 .mypy_cache/
 *.csv
+*.xls

@@ -3,7 +3,6 @@
 import re
 import abc
 import xlwt
-import psycopg2
 from xlwt.Style import XFStyle
 from utils.base_xml import BaseXML
 
