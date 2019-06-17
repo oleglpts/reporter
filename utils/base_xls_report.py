@@ -250,7 +250,7 @@ class BaseXLSReport(BaseXML):
 
     """
 
-    def _get_style(self, node):
+    def _get_style(self, node, append=''):
         """
         Получение стиля указанного тега
 
@@ -266,7 +266,7 @@ class BaseXLSReport(BaseXML):
             style = ""                                      # стиль будет по умолчанию
         style_append = self._get_attr(node, "style")        # добавка для текущего элемента
         form = self._get_attr(node, "format")               # вытащить форма
-        style += " " + style_append                         # добавить добавку
+        style += " " + style_append + append                # добавить добавку
         if style + form not in self._styles:                # если нет стиля,
             self._styles[style + form] = xlwt.easyxf(style, form)  # создать и сохранить
         return self._styles[style + form]                   # вернуть стиль

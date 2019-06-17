@@ -189,6 +189,80 @@ class XLSReport(BaseXLSReport):
                 print("Database error: %s" % str(e))            # обработать
                 exit(1)                                         # и выйьт
             self._rows = self._conn.fetchall()                  # вытащить результат
+            suppress = [x.strip() for x in self._get_attr(node, "suppress", '').split(',')]
+            if suppress == ['']:
+                suppress = []
+            subtotal = [x.strip() for x in self._get_attr(node, "subtotal", '').split(',')]
+            if subtotal == ['']:
+                subtotal = []
+            total = [x.strip() for x in self._get_attr(node, "total", '').split(',')]
+            if total == ['']:
+                total = []
+            totals = {name: 0.0 for name in total}
+            subtotals = {}
+            field_numbers = {}
+            subtotal_rows = {x: [] for x in suppress}
+            if (suppress or total or subtotal) and len(self._rows) > 1:
+                i = 0
+                for num, field in enumerate(self._conn.description):
+                    field_numbers[field[0]] = num
+                    if totals and field[0] in totals:
+                        totals[field[0]] = self._rows[0][num]
+                    if field[0] in suppress or field[0] in total or field[0] in subtotal:
+                        i, work = 1, self._rows[0][num]
+                        while i < len(self._rows):
+                            if totals and field[0] in totals:
+                                totals[field[0]] += self._rows[i][num] if isinstance(self._rows[i][num], float) else 0.0
+                            if field[0] in suppress:
+                                while self._rows[i][num] == work and i < len(self._rows):
+                                    nn = [self._rows[i][p] for p in range(len(self._rows[0]))]
+                                    nn[num] = ''
+                                    self._rows[i] = tuple(nn)
+                                    i += 1
+                                subtotal_rows[field[0]].append(i)
+                                skip = self._get_int(self._get_attr(node, "skip", '0'))
+                                for _ in range(skip):
+                                    self._rows.insert(i, tuple('' for _ in range(len(self._rows[i]))))
+                                    for y in subtotal_rows:
+                                        for z in range(len(subtotal_rows[y])):
+                                            if subtotal_rows[y][z] > i:
+                                                subtotal_rows[y][z] += 1
+                                i += skip
+                                work = self._rows[i][num]
+                                while work == '' and i < len(self._rows):
+                                    i += 1
+                                    work = self._rows[i][num]
+
+                            i += 1
+                for x in subtotal_rows:
+                    subtotal_rows[x].append(i)
+                if total:
+                    skip_totals = self._get_int(self._get_attr(node, "skip_totals", '1'))
+                    y = ['' for _ in range(len(self._rows[0]))]
+                    for f in range(skip_totals):
+                        self._rows.append(tuple(y))
+                    y[0] = '<b>Total:'
+                    for x in totals:
+                        y[field_numbers[x]] = '<b>%s' % totals[x]
+                    self._rows.append(tuple(y))
+                if subtotal:
+                    for m, sp in enumerate(suppress):
+                        for fl in subtotal:
+                            i = 0
+                            for j in subtotal_rows[sp]:
+                                s = 0.0
+                                for k in range(i, j):
+                                    s += self._rows[k][field_numbers[fl]] if isinstance(self._rows[k][field_numbers[fl]], float) else 0.0
+                                i = j + len(suppress) - 1
+                                if j + len(suppress) - m - 1 in subtotals:
+                                    y = subtotals[j + len(suppress) - m - 1]
+                                else:
+                                    y = [self._rows[j + len(suppress) - m - 1][x] for x in range(len(self._rows[0]))]
+                                y[field_numbers[fl]] = '<b>%s' % s
+                                y[field_numbers[sp]] = '<b>Subtotal:'
+                                subtotals[j + len(suppress) - m - 1] = y
+            for x in subtotals:
+                self._rows[x] = subtotals[x]
             if len(self._rows) > self._rows_max:                # скорректировать
                 self._rows_max = len(self._rows)                # максимльное количество
         else:
@@ -240,7 +314,18 @@ class XLSReport(BaseXLSReport):
                     pass
             else:
                 value = ''
-            self._ws.write(row, col, value, self._get_style(node))
+            append = ''
+            if str(value).startswith('<b>'):
+                value = str(value)[3:]
+                if value.isnumeric():
+                    value = int(value)
+                else:
+                    try:
+                        value = float(value)
+                    except ValueError:
+                        pass
+                append = 'font: bold True;'
+            self._ws.write(row, col, value, self._get_style(node, append))
         if row > self._max:
             self._max = row
         self._field += 1
@@ -259,11 +344,12 @@ class XLSReport(BaseXLSReport):
         """
         row = self._get_int(self._get_attr(node, "row")) + self._curr
         col = self._get_int(self._get_attr(node, "col"))
+        cycle = self._get_int(self._get_attr(node, "cycle", '0'))
         if self._get_attr(node, "header") == "yes":
             self._ws.write(row, col, self._get_attr(node, "name"))
         else:
             row -= self._step
-        for i in range(len(self._rows)):
+        for i in range(len(self._rows) if not cycle else cycle):
             row += self._step
             formula = node.text
             formula = formula.replace("{{cs}}", str(row + 1)). \

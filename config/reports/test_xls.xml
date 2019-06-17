@@ -103,7 +103,7 @@
         <sql cycle="yes">
             <group step="4">
                 <groupliteral col="0" name="Type" row="5" header="no" stylename="Totals">Subtotal:</groupliteral>
-                <formula col="4" name="Total" row="5" header="no" stylename="Totals">
+                <formula col="4" name="Total" row="5" header="no" stylename="Totals" cycle="2">
                     INDIRECT("E" &amp; ({{ss}}+3)) + INDIRECT("E" &amp; ({{ss}}+4))
                 </formula>
             </group>
@@ -113,6 +113,32 @@
             <formula col="4" name="Total" row="0" header="no" stylename="Totals" format="0.00">
                     INDIRECT("E" &amp; ({{cs}}-5)) + INDIRECT("E" &amp; ({{cs}}-1))
             </formula>
+        </sql>
+    </report>
+    <report>
+        <name>{{title3}}</name>
+        <literal col="0" row="0" stylename="Subheaders">Media</literal>
+        <literal col="1" row="0" stylename="Subheaders">Genre</literal>
+        <literal col="2" row="0" stylename="Subheaders">Amount</literal>
+        <literal col="3" row="0" stylename="Subheaders">Discount</literal>
+        <literal col="4" row="0" stylename="Subheaders">Charged</literal>
+        <sql>
+            <request suppress="Media" skip="2" skip_totals="2" subtotal="Money, Discount, Charged" total="Money, Discount, Charged">
+                SELECT d.Name AS Media, c.Name as Genre, round(sum(a.Quantity * a.UnitPrice), 2) AS Money,
+                       round(sum(a.Quantity * a.UnitPrice/50), 2) AS Discount,
+                       round(sum(a.Quantity * a.UnitPrice), 2) - round(sum(a.Quantity * a.UnitPrice/50), 2) AS Charged
+                    FROM InvoiceLine AS a JOIN Track AS b ON(b.TrackId = a.TrackId) JOIN
+                         Genre AS c ON (c.GenreId = b.GenreId) JOIN MediaType as d ON (d.MediaTypeId = b.MediaTypeId)
+                    GROUP BY d.Name, c.Name
+                    ORDER BY d.Name, c.Name
+            </request>
+            <group step="1">
+                <field col="0" name="Media" header="no" row="1" width="7000" stylename="Fields"/>
+                <field col="1" name="Genre" header="no" row="1" width="5000" stylename="Fields"/>
+                <field col="2" name="Money" header="no" row="1" format="0.00" stylename="Fields"/>
+                <field col="3" name="Discount" header="no" row="1" format="0.00" stylename="Fields"/>
+                <field col="4" name="Charged" header="no" row="1" format="0.00" stylename="Fields"/>
+            </group>
         </sql>
     </report>
 </book>

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./reporter.py -p title0=Invoices, customer=, title1=Albums, artist= -o test -o test -n test_$1
+./reporter.py -p title0=Invoices, customer=, title1=Albums, title2=Money, title3=Sales, artist= -o test -n test_$1
