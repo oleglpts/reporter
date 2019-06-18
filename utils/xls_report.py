@@ -222,7 +222,9 @@ class XLSReport(BaseXLSReport):
                     i, work = 1, self._rows[0][num]
                     while i < len(self._rows):
                         if totals and field[0] in totals:
-                            totals[field[0]] += self._rows[i][num] if isinstance(self._rows[i][num], float) else 0.0
+                            totals[field[0]] += \
+                                self._rows[i][num] if isinstance(
+                                    self._rows[i][num], float) or isinstance(self._rows[i][num], int) else 0.0
                         if field[0] in suppress:
                             i = suppress_field(i)
                             subtotal_rows[field[0]].append(i)
@@ -273,7 +275,7 @@ class XLSReport(BaseXLSReport):
                         sum_subtotal = 0.0
                         for k in range(low_limit, high_limit):
                             value = self._rows[k][field_numbers[subtotal_field]]
-                            sum_subtotal += value if isinstance(value, float) else 0.0
+                            sum_subtotal += value if isinstance(value, float) or isinstance(value, int) else 0.0
                         low_limit = high_limit + len(suppress) - 1
                         in_subtotals = high_limit + len(suppress) - suppress_num - 1 in subtotals
                         row_num = high_limit + len(suppress) - suppress_num - 1
