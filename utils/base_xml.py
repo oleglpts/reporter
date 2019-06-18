@@ -1,6 +1,7 @@
 # _*_ coding: utf-8 _*_
 
 import abc
+import logging
 from lxml import etree
 from io import BytesIO
 
@@ -30,9 +31,10 @@ class BaseXML(object):
         :raise etree.XMLSyntaxError синтаксическая ошибка в XML
         :raise KeyError нет нужного параметра ('xml')
         """
-        self._param = param                                 # параметры класса
-        self._tags = {}                                     # теги для обработки
-        self._set_tags()                                    # установить обрабатываемые теги
+        self._param = param
+        self._tags = {}
+        self._set_tags()
+        self._logger = param['logger'] if 'logger' in param else logging.getLogger()
         try:                                                # пробуем
             xml = None                                      # initialization
             if 'xml' in param:                              # задан файл XML
@@ -158,6 +160,23 @@ class BaseXML(object):
         except ValueError as e:                             # ошибка:
             print("Value Error: %s" % str(e))               # нецифровое значение
             exit(1)                                         # выйти
+
+    @staticmethod
+    def _string_to_list(source_string, delimiter=','):
+        """
+
+        Parameters string to list
+
+        :param source_string: source string
+        :type source_string: str
+        :param delimiter: delimiter
+        :type delimiter: str
+        :return: parameters list
+        :rtype: list
+
+        """
+        suppress = [x.strip() for x in source_string.split(delimiter)]
+        return suppress if suppress != [''] else []
 
     """
 

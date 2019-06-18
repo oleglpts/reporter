@@ -1,7 +1,7 @@
 # _*_ coding: utf-8 _*_
 
 import xlwt
-import psycopg2
+import pyodbc
 
 from utils.base_xls_report import BaseXLSReport
 
@@ -180,47 +180,54 @@ class XLSReport(BaseXLSReport):
         :param node: элемент дерева разбора, содержащий тег
         :type node: _Element
         """
-        request = node.text                                 # запрос
-        if request is not None:
-            try:                                                # пробуем
-                self._conn.execute(request)                     # выполнить запрос
-            except psycopg2.Error as e:                         # похоже
-                print("Hint: incorrect --sql-parameter?")       # на ошибку,
-                print("Database error: %s" % str(e))            # обработать
-                exit(1)                                         # и выйьт
-            self._rows = self._conn.fetchall()                  # вытащить результат
-            suppress = [x.strip() for x in self._get_attr(node, "suppress", '').split(',')]
-            if suppress == ['']:
-                suppress = []
-            subtotal = [x.strip() for x in self._get_attr(node, "subtotal", '').split(',')]
-            if subtotal == ['']:
-                subtotal = []
-            total = [x.strip() for x in self._get_attr(node, "total", '').split(',')]
-            if total == ['']:
-                total = []
-            totals = {name: 0.0 for name in total}
-            subtotals = {}
-            field_numbers = {}
-            subtotal_rows = {x: [] for x in suppress}
-            if (suppress or total or subtotal) and len(self._rows) > 1:
-                i = 0
-                for num, field in enumerate(self._conn.description):
-                    field_numbers[field[0]] = num
-                    if totals and field[0] in totals:
-                        totals[field[0]] = self._rows[0][num]
-                    if field[0] in suppress or field[0] in total or field[0] in subtotal:
-                        i, work = 1, self._rows[0][num]
-                        while i < len(self._rows):
-                            if totals and field[0] in totals:
-                                totals[field[0]] += self._rows[i][num] if isinstance(self._rows[i][num], float) else 0.0
-                            if field[0] in suppress:
-                                while self._rows[i][num] == work and i < len(self._rows):
-                                    nn = [self._rows[i][p] for p in range(len(self._rows[0]))]
-                                    nn[num] = ''
-                                    self._rows[i] = tuple(nn)
-                                    i += 1
-                                subtotal_rows[field[0]].append(i)
-                                skip = self._get_int(self._get_attr(node, "skip", '0'))
+
+        def compute_all():
+            """
+
+            Compute subtotals and totals
+
+            """
+
+            def suppress_field(ind):
+                """
+
+                Suppress field
+
+                :param ind: current row
+                :type ind: int
+                :return: new current row
+                :rtype: int
+
+                """
+                while ind < len(self._rows) and self._rows[ind][num] == work:
+                    stop = False
+                    for field_name in field_numbers:
+                        if field_name == field[0]:
+                            continue
+                        if self._rows[ind][field_numbers[field_name]] != '':
+                            stop = True
+                    if stop:
+                        break
+                    row = [self._rows[ind][p] for p in range(len(self._rows[0]))]
+                    row[num] = ''
+                    self._rows[ind] = tuple(row)
+                    ind += 1
+                return ind
+
+            for num, field in enumerate(self._conn.description):
+                field_numbers[field[0]] = num
+                if totals and field[0] in totals:
+                    totals[field[0]] = self._rows[0][num]
+                if field[0] in suppress or field[0] in total or field[0] in subtotal:
+                    i, work = 1, self._rows[0][num]
+                    while i < len(self._rows):
+                        if totals and field[0] in totals:
+                            totals[field[0]] += self._rows[i][num] if isinstance(self._rows[i][num], float) else 0.0
+                        if field[0] in suppress:
+                            i = suppress_field(i)
+                            subtotal_rows[field[0]].append(i)
+                            skip = self._get_int(self._get_attr(node, "skip", '0'))
+                            if i < len(self._rows):
                                 for _ in range(skip):
                                     self._rows.insert(i, tuple('' for _ in range(len(self._rows[i]))))
                                     for y in subtotal_rows:
@@ -232,41 +239,74 @@ class XLSReport(BaseXLSReport):
                                 while work == '' and i < len(self._rows):
                                     i += 1
                                     work = self._rows[i][num]
+                        i += 1
+            if total:
+                set_totals()
+            if subtotal:
+                compute_subtotals()
 
-                            i += 1
-                for x in subtotal_rows:
-                    subtotal_rows[x].append(i)
-                if total:
-                    skip_totals = self._get_int(self._get_attr(node, "skip_totals", '1'))
-                    y = ['' for _ in range(len(self._rows[0]))]
-                    for f in range(skip_totals):
-                        self._rows.append(tuple(y))
-                    y[0] = '<b>Total:'
-                    for x in totals:
-                        y[field_numbers[x]] = '<b>%s' % totals[x]
-                    self._rows.append(tuple(y))
-                if subtotal:
-                    for m, sp in enumerate(suppress):
-                        for fl in subtotal:
-                            i = 0
-                            for j in subtotal_rows[sp]:
-                                s = 0.0
-                                for k in range(i, j):
-                                    s += self._rows[k][field_numbers[fl]] if isinstance(self._rows[k][field_numbers[fl]], float) else 0.0
-                                i = j + len(suppress) - 1
-                                if j + len(suppress) - m - 1 in subtotals:
-                                    y = subtotals[j + len(suppress) - m - 1]
-                                else:
-                                    y = [self._rows[j + len(suppress) - m - 1][x] for x in range(len(self._rows[0]))]
-                                y[field_numbers[fl]] = '<b>%s' % s
-                                y[field_numbers[sp]] = '<b>Subtotal:'
-                                subtotals[j + len(suppress) - m - 1] = y
-            for x in subtotals:
-                self._rows[x] = subtotals[x]
-            if len(self._rows) > self._rows_max:                # скорректировать
-                self._rows_max = len(self._rows)                # максимльное количество
-        else:
+        def set_totals():
+            """
+
+            Set totals values
+
+            """
+            skip_totals = self._get_int(self._get_attr(node, "skip_totals", '1'))
+            y = ['' for _ in range(len(self._rows[0]))]
+            for f in range(skip_totals):
+                self._rows.append(tuple(y))
+            y[0] = '<b>Total:'
+            for x in totals:
+                y[field_numbers[x]] = '<b>%s' % totals[x]
+            self._rows.append(tuple(y))
+
+        def compute_subtotals():
+            """
+
+            Compute subtotals
+
+            """
+            for suppress_num, suppress_field in enumerate(suppress):
+                for subtotal_field in subtotal:
+                    low_limit = 0
+                    for high_limit in subtotal_rows[suppress_field]:
+                        sum_subtotal = 0.0
+                        for k in range(low_limit, high_limit):
+                            value = self._rows[k][field_numbers[subtotal_field]]
+                            sum_subtotal += value if isinstance(value, float) else 0.0
+                        low_limit = high_limit + len(suppress) - 1
+                        in_subtotals = high_limit + len(suppress) - suppress_num - 1 in subtotals
+                        row_num = high_limit + len(suppress) - suppress_num - 1
+                        from_rows = [self._rows[row_num][x] for x in range(len(self._rows[0]))]
+                        seq = subtotals[row_num] if in_subtotals else from_rows
+                        seq[field_numbers[subtotal_field]] = '<b>%s' % sum_subtotal
+                        seq[field_numbers[suppress_field]] = '<b>Subtotal:'
+                        subtotals[high_limit + len(suppress) - suppress_num - 1] = seq
+
+        request = node.text
+        if request is None:
             self._rows = [(0,)]
+            return
+        try:
+            self._conn.execute(request)
+        except pyodbc.Error as e:
+            self._logger.error("database error: %s" % str(e))
+            self._logger.error('hint: incorrect sql or sql parameter?')
+            exit(1)
+        self._rows = self._conn.fetchall()
+        suppress = self._string_to_list(self._get_attr(node, "suppress", ''))
+        subtotal = self._string_to_list(self._get_attr(node, "subtotal", ''))
+        total = self._string_to_list(self._get_attr(node, "total", ''))
+        totals = {name: 0.0 for name in total}
+        subtotals = {}
+        field_numbers = {}
+        subtotal_rows = {x: [] for x in suppress}
+        if (suppress or total or subtotal) and len(self._rows) > 1:
+            compute_all()
+        for x in subtotals:
+            self._rows[x] = subtotals[x]
+        if len(self._rows) > self._rows_max:
+            self._rows_max = len(self._rows)
 
     """
 

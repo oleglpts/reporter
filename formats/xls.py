@@ -19,6 +19,7 @@ def xls(report_config):
     XLSReport({
         'cursor': cursor,
         'xml': '%s%s.xml' % (cmd_args.reports, cmd_args.name),
+        'logger': logger,
         'parameters': {parm.split('=')[0]: parm.split('=')[1].replace(',', '') for parm in cmd_args.parameters}
     }).to_file('%s.xls' % cmd_args.output)
     cursor.close()

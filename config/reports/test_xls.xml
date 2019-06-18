@@ -141,4 +141,35 @@
             </group>
         </sql>
     </report>
+    <report>
+        <name>{{title4}}</name>
+        <literal col="0" row="0" stylename="Subheaders">Customer</literal>
+        <literal col="1" row="0" stylename="Subheaders">Media</literal>
+        <literal col="2" row="0" stylename="Subheaders">Genre</literal>
+        <literal col="3" row="0" stylename="Subheaders">Amount</literal>
+        <literal col="4" row="0" stylename="Subheaders">Discount</literal>
+        <literal col="5" row="0" stylename="Subheaders">Charged</literal>
+        <sql>
+            <request suppress="Customer, Media" skip="2" skip_totals="2" subtotal="Money, Discount, Charged" total="Money, Discount, Charged">
+                SELECT f.LastName || ' ' || f.FirstName AS Customer, d.Name AS Media, c.Name as Genre,
+                       round(sum(a.Quantity * a.UnitPrice), 2) AS Money,
+                       round(sum(a.Quantity * a.UnitPrice/50), 2) AS Discount,
+                       round(sum(a.Quantity * a.UnitPrice), 2) - round(sum(a.Quantity * a.UnitPrice/50), 2) AS Charged
+                    FROM InvoiceLine AS a JOIN Track AS b ON(b.TrackId = a.TrackId) JOIN
+                         Genre AS c ON (c.GenreId = b.GenreId) JOIN MediaType as d ON (d.MediaTypeId = b.MediaTypeId) JOIN
+                         Invoice as e ON (e.InvoiceId = a.InvoiceId) JOIN Customer as f ON (f.CustomerId = e.CustomerId)
+                    WHERE f.LastName LIKE '%Zimmermann%' OR f.LastName LIKE '%Almeida%'
+                    GROUP BY Customer, d.Name, c.Name
+                    ORDER BY Customer, d.Name, c.Name
+            </request>
+            <group step="1">
+                <field col="0" name="Customer" header="no" row="1" width="5000" stylename="Fields"/>
+                <field col="1" name="Media" header="no" row="1" width="7000" stylename="Fields"/>
+                <field col="2" name="Genre" header="no" row="1" width="5000" stylename="Fields"/>
+                <field col="3" name="Money" header="no" row="1" format="0.00" stylename="Fields"/>
+                <field col="4" name="Discount" header="no" row="1" format="0.00" stylename="Fields"/>
+                <field col="5" name="Charged" header="no" row="1" format="0.00" stylename="Fields"/>
+            </group>
+        </sql>
+    </report>
 </book>
