@@ -2,8 +2,8 @@ import json
 import pycurl
 from io import BytesIO
 import multiprocessing
-from urllib.parse import urlencode
-from config import cmd_args, logger, translate as _
+from urllib.parse import urlencode, unquote
+from reporter.config import cmd_args, logger, translate as _
 from bottle import route, run, request
 
 
@@ -17,7 +17,7 @@ def bottle_callback():
     :rtype: str
 
     """
-    logger.debug('%s: \'%s\'' % (_('callback received data'), request.body.read().decode()))
+    logger.debug('%s: \'%s\'' % (_('callback received data'), unquote(request.body.read().decode())))
     return '{"result": "Ok"}'
 
 

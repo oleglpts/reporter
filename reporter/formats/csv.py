@@ -1,5 +1,6 @@
-from utils.helpers import database_connect
-from config import logger, cmd_args, translate as _
+import os
+from reporter.utils.helpers import database_connect
+from reporter.config import logger, cmd_args, translate as _
 
 
 def csv(report_config):
@@ -12,7 +13,7 @@ def csv(report_config):
 
     """
 
-    connect = database_connect(report_config['connection'], logger)
+    connect = database_connect(report_config['connection'].replace('~', os.getenv('HOME')), logger)
     cursor = connect.cursor()
     logger.info('%s csv-%s' % (_('working'), _('generator')))
     with open('%s.csv' % cmd_args.output, 'w') as f:

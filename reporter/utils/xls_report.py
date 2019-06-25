@@ -3,7 +3,7 @@
 import xlwt
 import pyodbc
 
-from utils.base_xls_report import BaseXLSReport
+from reporter.utils.base_xls_report import BaseXLSReport
 
 """
 

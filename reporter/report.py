@@ -5,13 +5,10 @@
 #
 # -n test_xls -p artist="Symphony Orchestra", title=Albums
 
-
+import sys
 import json
+import time
 import importlib
-from utils.callback import server
-from utils.helpers import error_handler
-from utils.callback import callback_terminate
-from config import translate as _, logger, cmd_args
 
 
 ########################################################################################################################
@@ -20,8 +17,14 @@ from config import translate as _, logger, cmd_args
 
 
 if __name__ == '__main__':
+    sys.path.append('../')
+    from reporter.utils.callback import server
+    from reporter.utils.helpers import error_handler
+    from reporter.utils.callback import callback_terminate
+    from reporter.config import translate as _, logger, cmd_args
     if cmd_args.callback_url == 'http://localhost:8080' and cmd_args.token:
         server.start()
+        time.sleep(1)
     form = None
     logger.info('%s, %s: %s' % (_('reporter started'), _('logging level'), cmd_args.log_level))
     logger.info('%s \'%s\'' % (_('report name'), cmd_args.name))
@@ -29,7 +32,7 @@ if __name__ == '__main__':
         with open('%s%s.json' % (cmd_args.reports, cmd_args.name), 'r') as config_file:
             report_config = json.load(config_file)
         form = report_config.get('format', 'csv')
-        getattr(importlib.import_module('formats.%s' % form), form)(report_config)
+        getattr(importlib.import_module('reporter.formats.%s' % form), form)(report_config)
         file_path = '%s.%s' % (cmd_args.output, form)
         logger.info('%s \'%s\'' % (_('output file'), file_path))
         callback_terminate(0, {'result': file_path, 'message': 'Success'})

@@ -48,7 +48,7 @@ def activate_virtual_environment(**kwargs):
     - packages (path to packages in environment, default: 'lib/python{VERSION}/site-packages')
 
     """
-    env = kwargs.get('environment', 'venv')
+    env = kwargs.get('environment', 'venv').replace('~', os.getenv('HOME'))
     env_path = env if env[0:1] == "/" else os.getcwd() + "/" + env
     env_activation = env_path + '/' + 'bin/activate_this.py'
     site.addsitedir(env_path + '/' + kwargs.get('packages', 'lib/python%s.%s/site-packages' % (
@@ -78,7 +78,7 @@ def set_localization(**kwargs):
 
     """
     locale_domain = kwargs.get('locale_domain', sys.argv[0])
-    locale_dir = kwargs.get('locale_dir', '/usr/share/locale')
+    locale_dir = kwargs.get('locale_dir', '/usr/share/locale').replace('~', os.getenv('HOME'))
     language = kwargs.get('language', 'en')
     gettext.install(locale_domain, locale_dir)
     try:

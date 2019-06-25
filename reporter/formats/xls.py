@@ -1,6 +1,7 @@
-from config import logger, cmd_args
-from utils.xls_report import XLSReport
-from utils.helpers import database_connect
+import os
+from reporter.config import logger, cmd_args
+from reporter.utils.xls_report import XLSReport
+from reporter.utils.helpers import database_connect
 
 
 def xls(report_config):
@@ -13,7 +14,7 @@ def xls(report_config):
 
     """
 
-    connect = database_connect(report_config['connection'], logger)
+    connect = database_connect(report_config['connection'].replace('~', os.getenv('HOME')), logger)
     cursor = connect.cursor()
     logger.info('%s xls-%s' % (_('working'), _('generator')))
     XLSReport({

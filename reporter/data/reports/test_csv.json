@@ -1,6 +1,6 @@
 {
     "format": "csv",
-    "connection": "Driver=libsqlite3odbc-0.9995.so;Database=/home/oleg/PycharmProjects/reporter/chinook.sqlite",
+    "connection": "Driver=libsqlite3odbc-0.9995.so;Database=~/.report/test/chinook.sqlite",
     "sql": [
         "SELECT b.LastName AS \"First name\", b.FirstName AS \"Last name\", round(sum(a.Total), 2) AS Total, round(sum(a.Total)/50, 2) AS Discount FROM Invoice AS a JOIN Customer AS b ON (b.CustomerId = a.CustomerId) WHERE b.LastName LIKE '%{{customer}}%' GROUP BY b.LastName, b.FirstName ORDER BY b.LastName, b.FirstName;",
         "SKIP=2",

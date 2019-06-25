@@ -4,7 +4,7 @@ import re
 import abc
 import xlwt
 from xlwt.Style import XFStyle
-from utils.base_xml import BaseXML
+from reporter.utils.base_xml import BaseXML
 
 """
 

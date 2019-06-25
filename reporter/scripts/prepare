@@ -1,0 +1,4 @@
+#!/bin/bash
+
+./venv_create report
+./data_create report
