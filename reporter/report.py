@@ -39,7 +39,7 @@ if __name__ == '__main__':
     except FileNotFoundError:
         logger.error("%s \'%s\' %s" % (_('report'), cmd_args.name, _('does not exists')))
         callback_terminate(1, {'result': 'empty', 'message': 'Report \'%s\' does not exists' % cmd_args.name})
-    except ModuleNotFoundError as e:
+    except ImportError as e:
         logger.error("%s \'%s\' %s" % (_('format'), form, _('not implemented')))
         callback_terminate(2, {'result': 'empty', 'message': 'Format \'%s\' not implemented' % form})
     except Exception as e:
