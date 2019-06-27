@@ -10,6 +10,8 @@ def csv(report_config):
 
     :param report_config: report configuration
     :type report_config: dict
+    :return: True if no error
+    :rtype: bool
 
     """
 
@@ -44,3 +46,4 @@ def csv(report_config):
                 f.write('\n')
     cursor.close()
     connect.close()
+    return True

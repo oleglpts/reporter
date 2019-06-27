@@ -32,10 +32,13 @@ if __name__ == '__main__':
         with open('%s%s.json' % (cmd_args.reports, cmd_args.name), 'r') as config_file:
             report_config = json.load(config_file)
         form = report_config.get('format', 'csv')
-        getattr(importlib.import_module('reporter.formats.%s' % form), form)(report_config)
+        condition_code = getattr(importlib.import_module('reporter.formats.%s' % form), form)(report_config)
         file_path = '%s.%s' % (cmd_args.output, form)
         logger.info('%s \'%s\'' % (_('output file'), file_path))
-        callback_terminate(0, {'result': file_path, 'message': 'Success'})
+        if condition_code:
+            callback_terminate(0, {'result': file_path, 'message': 'Success'})
+        else:
+            callback_terminate(3, {'result': 'empty', 'message': 'Fatal error'})
     except FileNotFoundError:
         logger.error("%s \'%s\' %s" % (_('report'), cmd_args.name, _('does not exists')))
         callback_terminate(1, {'result': 'empty', 'message': 'Report \'%s\' does not exists' % cmd_args.name})

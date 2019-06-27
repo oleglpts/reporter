@@ -1,184 +1,423 @@
 # _*_ coding: utf-8 _*_
 
+import abc
 import xlwt
 import pyodbc
+import logging
+import builtins
+from lxml import etree
+from io import BytesIO
+from xlwt.Style import XFStyle
 
-from reporter.utils.base_xls_report import BaseXLSReport
+_ = builtins.__dict__.get('_', lambda x: x)
 
-"""
 
-Генерация отчётов на основании XML-описания и вывод их в .xls-файл
+class BaseXML(object):
+    """
 
-"""
+    xml-file processing
+
+    """
+
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self, param):
+        """
+
+        Constructor
+
+        Required parameter 'xml': path to xml-file
+
+        :param param: parameters
+        :type param: dict
+        :raise IOError file not found or inaccessible
+        :raise etree.XMLSyntaxError syntax error in XML
+        :raise KeyError parameter not found ('xml')
+
+        """
+        self._fatal_error = False
+        self._param = param
+        self._tags = {}
+        self._set_tags()
+        self._logger = param['logger'] if 'logger' in param else logging.getLogger()
+        try:
+            xml = None
+            if 'xml' in param:
+                xml = open(param['xml']).read()
+            elif 'xml_string' in param:
+                xml = param['xml_string']
+            else:
+                self._logger.critical(_('XML not defined - terminating'))
+                self._fatal_error = True
+            if not self._fatal_error:
+                xml = self._replace_param(xml)
+                xml = BytesIO(bytes(xml.encode()))
+                self._tree = etree.parse(xml)
+        except IOError:
+            self._logger.critical(_('XML not found - terminating'))
+            self._fatal_error = True
+        except etree.XMLSyntaxError as e:
+            self._logger.critical('%s: %s' % (_('XML error'), str(e)))
+            self._fatal_error = True
+        except KeyError as e:
+            self._logger.critical('%s %s %s %s' % (_('key'), str(e), _('not found'), _('terminating')))
+            self._fatal_error = True
+
+    @property
+    def fatal_error(self):
+        """
+
+        Fatal error
+
+        :return: True if fatal error
+
+        """
+        return self._fatal_error
+
+    def run_xml(self):
+        """
+
+        xml file processing
+
+        """
+        self.__get_node(self._tree.getroot())
+
+    @abc.abstractmethod
+    def _set_tags(self):
+        """
+
+        Setting tag processing methods
+
+        """
+        raise NotImplementedError("Not implemented")
+
+    @abc.abstractmethod
+    def _replace_param(self, xml):
+        """
+        Replacing special variables in base XML
+
+        :param xml: source XML
+        :type xml: str
+        :return: XML after replacing
+        :rtype: str
+        """
+        raise NotImplementedError("Not implemented")
+
+    @staticmethod
+    def _get_attr(node, attr, default=""):
+        """
+        Getting attribute value
+
+        :param node: parse tree element containing the tag
+        :type node: _Element
+        :param attr: attribute name
+        :type attr: str
+        :param default: default value
+        :type default: str
+        :return: attribute value
+        :rtype: str
+        :raise ValueError with encoding error
+        """
+        result = default
+        try:
+            result = node.attrib[attr]
+        except KeyError:
+            result = default
+        except ValueError as e:
+            print("Value Error: %s - %s" % (attr, str(e)))
+            exit(1)
+        return result
+
+    @staticmethod
+    def _get_int(number):
+        """
+        Convert digital string to binary integer
+
+        :param number: integer in string representation
+        :return: integer in binary representation
+        :raise ValueError with non-numeric parameter value
+        :raise UnicodeEncode error with encoding error
+        """
+        try:
+            return int(number)
+        except UnicodeEncodeError:
+            print("UnicodeEncodeError: %s" % number)
+            exit(1)
+        except ValueError as e:
+            print("Value Error: %s" % str(e))
+            exit(1)
+
+    @staticmethod
+    def _string_to_list(source_string, delimiter=','):
+        """
+
+        Parameters string to list
+
+        :param source_string: source string
+        :type source_string: str
+        :param delimiter: delimiter
+        :type delimiter: str
+        :return: parameters list
+        :rtype: list
+
+        """
+        suppress = [x.strip() for x in source_string.split(delimiter)]
+        return suppress if suppress != [''] else []
+
+    def __get_node(self, node):
+        """
+
+        Tag processing
+
+        :param node: XML tag
+        :type node: _Element
+        """
+        if node.tag in self._tags:
+            func = self._tags[node.tag]
+            func(node)
+        for n in node:
+            self.__get_node(n)
+
+
+class BaseXLSReport(BaseXML):
+    """
+
+    Report generation in xls-format according to the xml description (abstract class)
+
+    """
+    def __init__(self, param):
+        """
+
+        Constructor
+
+        Required parameters: cursor, xml, [sql, title]
+
+        :param param: parameters
+        :type param: dict
+        :raise KeyError required parameter expected
+
+        """
+        self._param = param
+        self._parameters = {}
+        self._set_parameters()
+        self._rows = None
+        self._styles = {}
+        self._rows_max = 0
+        self._wb = xlwt.Workbook()
+        self._ws = None
+        self._step = 1
+        self._curr = 0
+        self._sheet = 0
+        self._max = -1
+        self._field = 0
+        BaseXML.__init__(self, param)
+        self._conn = param['cursor']
+
+    def to_file(self, filename):
+        """
+
+        Save report to .xls-file
+
+        :param filename: output file name
+        :type filename: str
+        """
+        if not self._fatal_error:
+            self.run_xml()
+            self._wb.save(filename)
+
+    @abc.abstractmethod
+    def _set_parameters(self):
+        """
+
+        Set parameters
+
+        """
+        raise NotImplementedError("Method not implemented")
+
+    def _get_style(self, node, append=''):
+        """
+        Getting the style of the specified tag
+
+        :param node: parse tree element containing the tag
+        :type node: _Element
+        :return: style of the specified tag
+        :rtype: XFStyle
+        """
+        style_name = self._get_attr(node, "stylename")
+        try:
+            style = self._styles[style_name]
+        except KeyError:
+            style = ""
+        style_append = self._get_attr(node, "style")
+        form = self._get_attr(node, "format")
+        style += " " + style_append + append
+        if style + form not in self._styles:
+            self._styles[style + form] = xlwt.easyxf(style, form)
+        return self._styles[style + form]
+
+    def _replace_param(self, xml):
+        """
+
+        Replacing special variables in base XML
+
+        :param xml: source XML
+        :type xml: str
+        :return: XML after replacing
+        :rtype: str
+        """
+        return self.__subst_special_vars(xml)
+
+    @staticmethod
+    def __subst_special_var(xml, parm, name):
+        """
+        Replacing special variable in XML
+
+        :param xml: XML
+        :type xml: str
+        :param parm: parameter name
+        :type parm: str
+        :param name: special variable name
+        :type name str
+        :return: XML after substitution
+        :rtype: str
+
+        """
+        return xml.replace('{{%s}}' % name, parm)
+
+    def __subst_special_vars(self, xml):
+        """
+        Replacing special variables in XML
+
+        :param xml: XML
+        :type xml: str
+        :return: XML after substitutions
+        :rtype: str
+        """
+        for parameter in self._parameters:
+            xml = self.__subst_special_var(xml,
+                                           self._parameters[parameter],
+                                           parameter)
+        return xml
 
 
 class XLSReport(BaseXLSReport):
     """
 
-    "Public" методы
+    Report generation in xls-format according to the xml description
 
     """
-    """
-
-    Конструктор
-
-    """
-
     def __init__(self, param):
         """
-        Конструктор
+        Constructor
 
-        Список параметров должен содержать как минимум параметры:
-        host, port, database, user, password, xml, sql, title
-        :param param: параметры командной строки
+        Required parameters: cursor, xml, sql, title
+
+        :param param: parameters
         :type param: dict
+
         """
         BaseXLSReport.__init__(self, param)
 
-    """
-
-    "Protected" методы
-
-    """
-    """
-
-    Установка параметров, подставляемых из командной строки
-
-    """
-
     def _set_parameters(self):
         """
-        Установка параметров, подставляемых
-        из командной строки
+
+        Set parameters
+
         """
         self._parameters = self._param['parameters']
 
-    """
-
-    Установка методов обработки тегов
-
-    """
     def _set_tags(self):
         """
-        Установка методов обработки тегов
+
+        Setting tag processing methods
+
         """
         self._tags = {
-            "report": self.get_report,                      # <report>
-            "name": self.get_name,                          # <name>
-            "literal": self.get_literal,                    # <literal>
-            "groupliteral": self.get_groupliteral,          # <groupliteral>
-            "sql": self.get_sql,                            # <sql>
-            "request": self.get_request,                    # <request>
-            "group": self.get_group,                        # <group>
-            "field": self.get_field,                        # <field>
-            "formula": self.get_formula,                    # <formula>
-            "styledef": self.get_styledef                   # <styledef>
+            "report": self.get_report,
+            "name": self.get_name,
+            "literal": self.get_literal,
+            "groupliteral": self.get_groupliteral,
+            "sql": self.get_sql,
+            "request": self.get_request,
+            "group": self.get_group,
+            "field": self.get_field,
+            "formula": self.get_formula,
+            "styledef": self.get_styledef
         }
-
-    """
-
-    Табличные "protected" методы
-
-    """
-    """
-
-    Обработка тега <report>
-
-    """
 
     def get_report(self, node):
         """
-        Обработка тега <report>
 
-        # :param node: элемент дерева разбора, содержащий тег
-        # :type node: _Element
+        Tag <report> processing
+
+        :param node: parse tree element containing the tag
+        :type node: _Element
+
         """
-        self._ws = None                                     # текущая вкладка .xls-файла
-        self._step = 1                                      # шаг отображения строки текущего отчёта
-        self._curr = 0                                      # текущая строка отчёта
-        self._max = -1                                      # максимальный номер строки относительно начала отчёта
-        self._field = 0                                     # текущее поле SQL-запроса
-        self._rows_max = 0                                  # максимальное количество строк в запросе отчёта
-
-    """
-
-    Обработка тега <styledef>
-
-    """
+        self._ws = None
+        self._step = 1
+        self._curr = 0
+        self._max = -1
+        self._field = 0
+        self._rows_max = 0
 
     def get_styledef(self, node):
         """
-        Обработка тега <styledef>
+        Tag <styledef> processing
 
-        :param node: элемент дерева разбора, содержащий тег
+        :param node: parse tree element containing the tag
         :type node: _Element
+
         """
         self._styles[self._get_attr(node, "name", "Normal")]\
-            = node.text                                     # просто добавляется стиль в словарь
+            = node.text
 
-    """
-
-    Обработка тега <literal>
-
-    """
     def get_literal(self, node):
         """
-        Обработка тега <literal>
+        Tag <literal> processing
 
-        :param node: элемент дерева разбора, содержащий тег
+        :param node: parse tree element containing the tag
         :type node: _Element
+
         """
-        row = self._get_int(self._get_attr(node, "row"))    # строка в файле
-        col = self._get_int(self._get_attr(node, "col"))    # столбец в файле
-        self._ws.write(row + self._curr, col, node.text,    # запись в файл
-                       self._get_style(node))               # со стилем
-
-    """
-
-    Обработка тега <name>
-
-    """
+        row = self._get_int(self._get_attr(node, "row"))
+        col = self._get_int(self._get_attr(node, "col"))
+        self._ws.write(row + self._curr, col, node.text,
+                       self._get_style(node))
 
     def get_name(self, node):
         """
-        Обработка тега <name>
+        Tag <name> processing
 
-        :param node: элемент дерева разбора, содержащий тег
+        :param node: parse tree element containing the tag
         :type node: _Element
+
         """
         sheet_name = node.text if node.text is not None \
-            else "Sheet%d" % self._sheet                    # имя отчёта
-        self._sheet += 1                                    # текущая вкладка
-        self._ws = self._wb.add_sheet(sheet_name)           # добавить новую вкладку
-
-    """
-
-    Обработка тега <sql>
-
-    """
+            else "Sheet%d" % self._sheet
+        self._sheet += 1
+        self._ws = self._wb.add_sheet(sheet_name)
 
     def get_sql(self, node):
         """
-        Обработка тега <sql>
-        :param node: элемент дерева разбора, содержащий тег
+        Tag <sql> processing
+
+        :param node: parse tree element containing the tag
         :type node: _Element
+
         """
-        if self._get_attr(node, "cycle", "no") == "no":     # если запрос не циклический
-            self._curr = self._max+1                        # подогнать текущую строку
-        self._field = 0                                     # обнулить текущее поле
+        if self._get_attr(node, "cycle", "no") == "no":
+            self._curr = self._max+1
+        self._field = 0
         self._rows = [(0,)]
-
-    """
-
-    Обработка тега <request>
-
-    """
 
     def get_request(self, node):
         """
-        Обработка тега <request>
-        :param node: элемент дерева разбора, содержащий тег
+        Tag <request> processing
+
+        :param node: parse tree element containing the tag
         :type node: _Element
+
         """
 
         def compute_all():
@@ -310,32 +549,26 @@ class XLSReport(BaseXLSReport):
         if len(self._rows) > self._rows_max:
             self._rows_max = len(self._rows)
 
-    """
-
-    Обработка тега <group>
-
-    """
-
     def get_group(self, node):
         """
-        Обработка тега <group>
-        :param node: элемент дерева разбора, содержащий тег
+
+        Tag <group> processing
+
+        :param node: parse tree element containing the tag
         :type node: _Element
+
         """
-        self._step = self._get_int(                         # установить шаг
-            self._get_attr(node, "step", "1"))              # вывода строк отчёта
-
-    """
-
-    Обработка тега <field>
-
-    """
+        self._step = self._get_int(
+            self._get_attr(node, "step", "1"))
 
     def get_field(self, node):
         """
-        Обработка тега <field>
-        :param node: элемент дерева разбора, содержащий тег
+
+        Tag <field> processing
+
+        :param node: parse tree element containing the tag
         :type node: _Element
+
         """
         row = self._get_int(self._get_attr(node, "row")) + self._curr
         col = self._get_int(self._get_attr(node, "col"))
@@ -372,17 +605,14 @@ class XLSReport(BaseXLSReport):
             self._max = row
         self._field += 1
 
-    """
-
-    Обработка тега <formula>
-
-    """
-
     def get_formula(self, node):
         """
-        Обработка тега <formula>
-        :param node: элемент дерева разбора, содержащий тег
+
+        Tag <formula> processing
+
+        :param node: parse tree element containing the tag
         :type node: _Element
+
         """
         row = self._get_int(self._get_attr(node, "row")) + self._curr
         col = self._get_int(self._get_attr(node, "col"))
@@ -401,17 +631,14 @@ class XLSReport(BaseXLSReport):
         if row > self._max:
             self._max = row
 
-    """
-
-    Обработка тега <groupliteral>
-
-    """
-
     def get_groupliteral(self, node):
         """
-        Обработка тега <groupliteral>
-        :param node: элемент дерева разбора, содержащий тег
+
+        Tag <groupliteral> processing
+
+        :param node: parse tree element containing the tag
         :type node: _Element
+
         """
         row = self._get_int(self._get_attr(node, "row")) + self._curr
         col = self._get_int(self._get_attr(node, "col"))

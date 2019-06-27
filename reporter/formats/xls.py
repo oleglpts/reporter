@@ -11,17 +11,21 @@ def xls(report_config):
 
     :param report_config: report configuration
     :type report_config: dict
+    :return: True if no error
+    :rtype: bool
 
     """
 
     connect = database_connect(report_config['connection'].replace('~', os.getenv('HOME')), logger)
     cursor = connect.cursor()
     logger.info('%s xls-%s' % (_('working'), _('generator')))
-    XLSReport({
+    report = XLSReport({
         'cursor': cursor,
         'xml': '%s%s.xml' % (cmd_args.reports, cmd_args.name),
         'logger': logger,
         'parameters': {parm.split('=')[0]: parm.split('=')[1].replace(',', '') for parm in cmd_args.parameters}
-    }).to_file('%s.xls' % cmd_args.output)
+    })
+    report.to_file('%s.xls' % cmd_args.output)
     cursor.close()
     connect.close()
+    return not report.fatal_error

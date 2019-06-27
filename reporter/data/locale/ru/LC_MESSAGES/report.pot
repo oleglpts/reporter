@@ -95,3 +95,7 @@ msgstr "ошибка"
 msgid "error termination"
 msgstr "выход по ошибке"
 
+#: utils/xls_report.py:48
+msgid "XML not defined - terminating"
+msgstr "не определён файл XML - завершение работы"
+
