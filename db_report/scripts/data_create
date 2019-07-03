@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PROGRAM=$1
+
+cp ../data/config_debug.json ~/.$PROGRAM/config.json
+cp -r ../data/reports/ ~/.$PROGRAM/
+cp -r ../data/test/ ~/.$PROGRAM/
+cp -r ../data/locale/ ~/.$PROGRAM/

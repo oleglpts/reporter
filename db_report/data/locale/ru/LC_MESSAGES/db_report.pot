@@ -1,0 +1,101 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-06-25 15:18+IDT\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: config/__init__.py:49
+msgid "incorrect logging level"
+msgstr "неверный уровень логирования"
+
+#: config/__init__.py:49
+msgid "used"
+msgstr "использовано"
+
+#: config/__init__.py:50
+msgid "by default"
+msgstr "по умолчанию"
+
+#: config/__init__.py:60
+msgid "activated virtual environment"
+msgstr "активизирована виртуальная среда"
+
+#: formats/csv.py:17 formats/xls.py:18
+msgid "generator"
+msgstr "генератор"
+
+#: formats/csv.py:17 formats/xls.py:18
+msgid "working"
+msgstr "работает"
+
+#: report.py:26
+msgid "logging level"
+msgstr "уровень логирования"
+
+#: report.py:26
+msgid "reporter started"
+msgstr "старт генератора"
+
+#: report.py:27
+msgid "report name"
+msgstr "имя отчёта"
+
+#: report.py:34
+msgid "output file"
+msgstr "выходной файл"
+
+#: report.py:37
+msgid "does not exists"
+msgstr "не существует"
+
+#: report.py:37
+msgid "report"
+msgstr "отчёт"
+
+#: report.py:40
+msgid "format"
+msgstr "формат"
+
+#: report.py:40
+msgid "not implemented"
+msgstr "не реализован(а)"
+
+#: utils/callback.py:20
+msgid "callback received data"
+msgstr "обратный вызов принял данные"
+
+#: utils/callback.py:134
+msgid "callback response"
+msgstr "обратный вызов ответил"
+
+#: utils/callback.py:138
+msgid "reporter result"
+msgstr "результат работы"
+
+#: utils/callback.py:139
+msgid "reporter ended"
+msgstr "генератор завершил работу"
+
+#: utils/helpers.py:169 utils/helpers.py:172
+msgid "error"
+msgstr "ошибка"
+
+#: utils/helpers.py:174
+msgid "error termination"
+msgstr "выход по ошибке"
+
+#: utils/xls_report.py:48
+msgid "XML not defined - terminating"
+msgstr "не определён файл XML - завершение работы"
+

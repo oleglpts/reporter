@@ -1,0 +1,4 @@
+{
+    "format": "xls",
+    "connection": "Driver=libsqlite3odbc.so;Database=~/.db_report/test/chinook.sqlite"
+}
