@@ -2,13 +2,11 @@ from setuptools import setup
 from setuptools.command.install import install as _install
 
 
-class install(_install):
+class PostInstall(_install):
     def run(self):
         import db_report
         db_report.copy_config()
-        super(install, self).run()
-        # self.run_command('build_css')
-        # super(install, self).do_egg_install()
+        super(PostInstall, self).run()
 
 
 setup(name='db_report',
@@ -36,5 +34,4 @@ setup(name='db_report',
       python_requires='>=3',
       package_data={'db_report': ['data', 'test']},
       install_requires=['xls-report>=0.0.3', 'bottle>=0.12.17', 'pyodbc==4.0.26', 'pycurl>=7.43.0.3'],
-      # cmdclass={'install': install}
-      )
+      cmdclass={'install': PostInstall})
