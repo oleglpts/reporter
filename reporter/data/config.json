@@ -1,9 +1,0 @@
-{
-    "environment": "~/.report/venv",
-    "locale_domain": "report",
-    "packages": "lib/python{VERSION}/site-packages",
-    "language": "ru",
-    "locale_dir": "~/.report/locale",
-    "log_file": "~/.report/report.log",
-    "log_format": "%(levelname)-10s|%(asctime)s| %(name)s --- %(message)s (%(filename)s:%(lineno)d)"
-}
