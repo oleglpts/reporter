@@ -14,7 +14,7 @@ parser.add_argument('-c', '--config', help='config file', default='~/.db_report/
 parser.add_argument('-o', '--output', help='output file', default='~/.db_report/test')
 parser.add_argument('-r', '--reports', help='reports directory', default='~/.db_report/reports/')
 parser.add_argument('-p', '--parameters', nargs='*', help='report parameters list', default=[])
-parser.add_argument('-n', '--name', help='report name', default='test_xls')
+parser.add_argument('-n', '--name', help='report name', required=True)
 parser.add_argument('-k', '--token', help='unique token for frontend', default='')
 parser.add_argument('-b', '--callback_url', help='callback url', default='http://localhost:8080')
 parser.add_argument('-l', '--log_level', help='logging level: CRITICAL, ERROR, WARNING, INFO, DEBUG or NOTSET',
