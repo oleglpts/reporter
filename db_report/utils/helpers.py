@@ -125,6 +125,27 @@ def get_logger(logger_name, logging_format, file_name, level=logging.INFO):
     return log
 
 
+def get_parm_value(parameters, name, env_name, default_value):
+    """
+
+    Get parameter value from config
+
+    :param parameters: parameters
+    :type parameters: dict
+    :param name: parameter name
+    :type name: str
+    :param env_name: environment variable name
+    :type env_name: str
+    :param default_value: default parameter value
+    :type default_value: str
+    :return: actual parameter value
+    :rtype: str
+
+    """
+    value = parameters.get(name, '')
+    return os.environ.get(env_name, default=default_value) if not value else value
+
+
 def database_connect(connection_string, logger):
     """
 
@@ -138,11 +159,37 @@ def database_connect(connection_string, logger):
     :rtype: pyodbc.Connection
 
     """
-    import pyodbc
-    try:
-        return pyodbc.connect(connection_string)
-    except pyodbc.Error as e:
-        error_handler(logger, e, 'ODBC', True)
+    driver, parameters, error_count = None, None, 0
+    while error_count < 2:
+        try:
+            parameters = {x.split('=')[0].strip().lower(): x.split('=')[1].strip() for x in connection_string.split(';')}
+            driver = parameters.get('driver', '')
+            break
+        except IndexError as e:
+            if error_count:
+                error_handler(logger, e, _('connection string') + ' --> ', True)
+            else:
+                connection_string = connection_string[:-1]
+                error_count += 1
+    if driver == 'psycopg2':
+        import psycopg2
+        try:
+            return psycopg2.connect('host=%s port=%s dbname=%s user=%s password=%s' % (
+                get_parm_value(parameters, 'host', 'POSTGRES_HOST', 'postgres'),
+                get_parm_value(parameters, 'port', 'POSTGRES_PORT', '5432'),
+                get_parm_value(parameters, 'dbname', 'POSTGRES_DB_NAME', 'postgres'),
+                get_parm_value(parameters, 'user', 'POSTGRES_USER', 'postgres'),
+                get_parm_value(parameters, 'password', 'POSTGRES_PASS', 'postgres')))
+        except psycopg2.OperationalError as e:
+            error_handler(logger, e, 'psycopg2 ', True)
+        except Exception as e:
+            error_handler(logger, e, 'psycopg2 ', True)
+    else:
+        import pyodbc
+        try:
+            return pyodbc.connect(connection_string)
+        except pyodbc.Error as e:
+            error_handler(logger, e, 'ODBC ', True)
 
 
 def error_handler(logger, error, message, sys_exit=False, debug_info=False):

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-# Required Debian packages: build-essential unixodbc-bin unixodbc-dev libsqliteodbc and other drivers
+# Required Debian packages: build-essential unixodbc-bin unixodbc-dev libsqliteodbc and other drivers (odbc-postgresql)
 # See: https://github.com/mkleehammer/pyodbc/wiki/
 #
 # -n test_xls -p artist="Symphony Orchestra", title=Albums
@@ -17,6 +17,7 @@ import importlib
 
 def main():
     sys.path.append('../')
+    sys.path.append('/app')
     from db_report.utils.callback import server
     from db_report.utils.helpers import error_handler
     from db_report.utils.callback import callback_terminate
