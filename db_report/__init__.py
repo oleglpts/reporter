@@ -12,7 +12,7 @@ def copy_config():
         'data/reports/test_postgresql_csv.json': 'reports/test_postgresql_csv.json',
         'data/reports/test_psycopg2_csv.json': 'reports/test_psycopg2_csv.json',
         'data/reports/test_sqlite3_csv.json': 'reports/test_sqlite3_csv.json',
-        'data/reports/test_sqlite3_xls.json': 'reports/test_sqlite3_cls.json',
+        'data/reports/test_sqlite3_xls.json': 'reports/test_sqlite3_xls.json',
         'data/reports/test_sqlite3_xls.xml': 'reports/test_sqlite3_xls.xml',
         'data/reports/test_xls.json': 'reports/test_xls.json',
         'data/reports/test_xls.xml': 'reports/test_xls.xml',
