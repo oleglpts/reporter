@@ -9,6 +9,8 @@ def copy_config():
         'data/locale/ru/LC_MESSAGES/db_report.mo': 'locale/ru/LC_MESSAGES/db_report.mo',
         'data/locale/en/LC_MESSAGES/db_report.mo': 'locale/en/LC_MESSAGES/db_report.mo',
         'data/reports/test_csv.json': 'reports/test_csv.json',
+        'data/reports/test_postgresql_csv.json': 'reports/test_postgresql_csv.json',
+        'data/reports/test_psycopg2_csv.json': 'reports/test_psycopg2_csv.json',
         'data/reports/test_xls.json': 'reports/test_xls.json',
         'data/reports/test_xls.xml': 'reports/test_xls.xml',
         'data/test/chinook.sqlite': 'test/chinook.sqlite',
