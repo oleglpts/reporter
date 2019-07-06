@@ -32,6 +32,8 @@ def main():
         with open('%s%s.json' % (cmd_args.reports, cmd_args.name), 'r') as config_file:
             report_config = json.load(config_file)
         form = report_config.get('format', 'csv')
+        if cmd_args.database:
+            report_config['connection'] = cmd_args.database
         condition_code = getattr(importlib.import_module('db_report.formats.%s' % form), form)(report_config)
         file_path = '%s.%s' % (cmd_args.output, form)
         logger.info('%s \'%s\'' % (_('output file'), file_path))

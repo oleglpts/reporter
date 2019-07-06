@@ -17,6 +17,7 @@ parser.add_argument('-p', '--parameters', nargs='*', help='report parameters lis
 parser.add_argument('-n', '--name', help='report name', required=True)
 parser.add_argument('-k', '--token', help='unique token for frontend', default='')
 parser.add_argument('-b', '--callback_url', help='callback url', default='http://localhost:8080')
+parser.add_argument('-d', '--database', help='database connection string')
 parser.add_argument('-l', '--log_level', help='logging level: CRITICAL, ERROR, WARNING, INFO, DEBUG or NOTSET',
                     default='INFO')
 
