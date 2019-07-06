@@ -171,6 +171,12 @@ def database_connect(connection_string, logger):
             else:
                 connection_string = connection_string[:-1]
                 error_count += 1
+    if driver == 'sqlite3':
+        import sqlite3
+        try:
+            return sqlite3.connect(get_parm_value(parameters, 'database', 'POSTGRES_DB_NAME', 'postgres'))
+        except Exception as e:
+            error_handler(logger, e, 'sqlite3 ', True)
     if driver == 'psycopg2':
         import psycopg2
         try:

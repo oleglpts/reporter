@@ -1,0 +1,201 @@
+<?xml version='1.0' encoding='utf-8'?>
+<book>
+    <report>
+        <name>{{title0}}</name>
+        <styledef name="Subheaders">
+            font: bold True; alignment: horiz centre;
+            borders: left 1, top 1, bottom 1, right 1;
+        </styledef>
+        <styledef name="Totals">
+            font: bold True;
+        </styledef>
+        <styledef name="Fields">borders: left 1, top 1, bottom 1, right 1;</styledef>
+        <styledef name="Headers">font: bold True; alignment: horiz centre;</styledef>
+        <literal col="0" row="0" stylename="Subheaders">Last name</literal>
+        <literal col="1" row="0" stylename="Subheaders">First name</literal>
+        <literal col="2" row="0" stylename="Subheaders">Amount</literal>
+        <literal col="3" row="0" stylename="Subheaders">Discount</literal>
+        <literal col="4" row="0" stylename="Subheaders">Total</literal>
+        <sql>
+            <request>
+                SELECT b.LastName, b.FirstName, round(sum(a.Total), 2), round(sum(a.Total)/50, 2)
+                    FROM Invoice AS a JOIN Customer AS b ON (b.CustomerId = a.CustomerId)
+                    WHERE b.LastName LIKE '%{{customer}}%'
+                    GROUP BY b.LastName, b.FirstName
+                    ORDER BY b.LastName, b.FirstName;
+            </request>
+            <group step="1">
+                <field col="0" name="Last name" header="no" row="1" stylename="Fields"/>
+                <field col="1" name="First name" header="no" row="1" stylename="Fields"/>
+                <field col="2" name="Amount" header="no" row="1" stylename="Fields"/>
+                <field col="3" name="Discount" header="no" row="1" stylename="Fields"/>
+            </group>
+            <formula col="4" name="Total" row="1" header="no" stylename="Fields" format="0.00">
+                    C{{cs}}-D{{cs}}
+            </formula>
+        </sql>
+        <sql>
+            <literal col="0" row="1" stylename="Totals">Total:</literal>
+            <formula col="4" name="Total" row="1" header="no" stylename="Totals" format="0.00">
+                    SUM(E2:E{{ds}})
+            </formula>
+        </sql>
+    </report>
+    <report>
+        <name>{{title1}}</name>
+        <literal col="0" row="0" stylename="Subheaders">Artist</literal>
+        <literal col="1" row="0" stylename="Subheaders">Album</literal>
+        <sql>
+            <request>
+                SELECT b.name as Artist, a.Title as Album
+                    FROM Album a JOIN Artist b ON(b.ArtistId = a.ArtistId)
+                    WHERE Artist LIKE '%{{artist}}%' ORDER BY Artist, Title;
+            </request>
+            <group step="1">
+                <field col="0" name="Artist" header="no" row="1" width="20000" stylename="Fields"/>
+                <field col="1" name="Album" header="no" row="1" width="20000" stylename="Fields"/>
+            </group>
+        </sql>
+    </report>
+    <report>
+        <name>{{title2}}</name>
+        <literal col="0" row="0" stylename="Headers">Report by some genres</literal>
+        <literal col="0" row="2" stylename="Headers">Media</literal>
+        <literal col="1" row="2" stylename="Headers">Genre</literal>
+        <literal col="2" row="2" stylename="Headers">Amount</literal>
+        <literal col="3" row="2" stylename="Headers">Discount</literal>
+        <literal col="4" row="2" stylename="Headers">Charged</literal>
+        <sql>
+            <request>
+                SELECT d.Name AS Media, round(sum(a.Quantity * a.UnitPrice), 2) AS Money,
+                       round(sum(a.Quantity * a.UnitPrice/50), 2) AS Discount
+                    FROM InvoiceLine AS a JOIN Track AS b ON(b.TrackId = a.TrackId) JOIN
+                         Genre AS c ON (c.GenreId = b.GenreId) JOIN MediaType as d ON (d.MediaTypeId = b.MediaTypeId)
+                    WHERE c.Name = 'Latin'
+                    GROUP BY d.Name, c.Name
+                    ORDER BY d.Name, c.Name
+            </request>
+            <group step="4">
+                <field col="0" name="Media" header="no" row="3" width="7000"/>
+                <field col="2" name="Money" header="no" row="3"/>
+                <field col="3" name="Discount" header="no" row="3"/>
+                <groupliteral col="1" name="Type" row="3" header="no" >Latin</groupliteral>
+                <formula col="4" name="Total" row="3" header="no">C{{cs}}-D{{cs}}</formula>
+            </group>
+        </sql>
+        <sql cycle="yes">
+            <request>
+                SELECT round(sum(a.Quantity * a.UnitPrice), 2) AS Money,
+                       round(sum(a.Quantity * a.UnitPrice/50), 2) AS Discount
+                    FROM InvoiceLine AS a JOIN Track AS b ON(b.TrackId = a.TrackId) JOIN
+                         Genre AS c ON (c.GenreId = b.GenreId) JOIN MediaType as d ON (d.MediaTypeId = b.MediaTypeId)
+                    WHERE c.Name = 'World'
+                    GROUP BY d.Name, c.Name
+                    ORDER BY d.Name, c.Name
+            </request>
+            <group step="4">
+                <field col="2" name="Money" header="no" row="4"/>
+                <field col="3" name="Discount" header="no" row="4"/>
+                <groupliteral col="1" name="Type" row="4" header="no" >World</groupliteral>
+                <formula col="4" name="Total" row="4" header="no">C{{cs}}-D{{cs}}</formula>
+            </group>
+        </sql>
+        <sql cycle="yes">
+            <group step="4">
+                <groupliteral col="0" name="Type" row="5" header="no" stylename="Totals">Subtotal:</groupliteral>
+                <formula col="4" name="Total" row="5" header="no" stylename="Totals" cycle="2">
+                    INDIRECT("E" &amp; ({{ss}}+3)) + INDIRECT("E" &amp; ({{ss}}+4))
+                </formula>
+            </group>
+        </sql>
+        <sql>
+            <literal col="0" row="0" stylename="Totals">Total:</literal>
+            <formula col="4" name="Total" row="0" header="no" stylename="Totals" format="0.00">
+                    INDIRECT("E" &amp; ({{cs}}-5)) + INDIRECT("E" &amp; ({{cs}}-1))
+            </formula>
+        </sql>
+    </report>
+    <report>
+        <name>{{title3}}</name>
+        <literal col="0" row="0" stylename="Subheaders">Media</literal>
+        <literal col="1" row="0" stylename="Subheaders">Genre</literal>
+        <literal col="2" row="0" stylename="Subheaders">Amount</literal>
+        <literal col="3" row="0" stylename="Subheaders">Discount</literal>
+        <literal col="4" row="0" stylename="Subheaders">Charged</literal>
+        <sql>
+            <request suppress="Media" skip="2" skip_totals="2" subtotal="Money, Discount, Charged" total="Money, Discount, Charged">
+                SELECT d.Name AS Media, c.Name as Genre, round(sum(a.Quantity * a.UnitPrice), 2) AS Money,
+                       round(sum(a.Quantity * a.UnitPrice/50), 2) AS Discount,
+                       round(sum(a.Quantity * a.UnitPrice), 2) - round(sum(a.Quantity * a.UnitPrice/50), 2) AS Charged
+                    FROM InvoiceLine AS a JOIN Track AS b ON(b.TrackId = a.TrackId) JOIN
+                         Genre AS c ON (c.GenreId = b.GenreId) JOIN MediaType as d ON (d.MediaTypeId = b.MediaTypeId)
+                    GROUP BY d.Name, c.Name
+                    ORDER BY d.Name, c.Name
+            </request>
+            <group step="1">
+                <field col="0" name="Media" header="no" row="1" width="7000" stylename="Fields"/>
+                <field col="1" name="Genre" header="no" row="1" width="5000" stylename="Fields"/>
+                <field col="2" name="Money" header="no" row="1" format="0.00" stylename="Fields"/>
+                <field col="3" name="Discount" header="no" row="1" format="0.00" stylename="Fields"/>
+                <field col="4" name="Charged" header="no" row="1" format="0.00" stylename="Fields"/>
+            </group>
+        </sql>
+    </report>
+    <report>
+        <name>{{title4}}</name>
+        <literal col="0" row="0" stylename="Subheaders">Customer</literal>
+        <literal col="1" row="0" stylename="Subheaders">Media</literal>
+        <literal col="2" row="0" stylename="Subheaders">Genre</literal>
+        <literal col="3" row="0" stylename="Subheaders">Amount</literal>
+        <literal col="4" row="0" stylename="Subheaders">Discount</literal>
+        <literal col="5" row="0" stylename="Subheaders">Charged</literal>
+        <sql>
+            <request suppress="Customer, Media" skip="2" skip_totals="2" subtotal="Money, Discount, Charged" total="Money, Discount, Charged">
+                SELECT f.LastName || ' ' || f.FirstName AS Customer, d.Name AS Media, c.Name as Genre,
+                       round(sum(a.Quantity * a.UnitPrice), 2) AS Money,
+                       round(sum(a.Quantity * a.UnitPrice/50), 2) AS Discount,
+                       round(sum(a.Quantity * a.UnitPrice), 2) - round(sum(a.Quantity * a.UnitPrice/50), 2) AS Charged
+                    FROM InvoiceLine AS a JOIN Track AS b ON(b.TrackId = a.TrackId) JOIN
+                         Genre AS c ON (c.GenreId = b.GenreId) JOIN MediaType as d ON (d.MediaTypeId = b.MediaTypeId) JOIN
+                         Invoice as e ON (e.InvoiceId = a.InvoiceId) JOIN Customer as f ON (f.CustomerId = e.CustomerId)
+                    WHERE f.LastName LIKE '%%'
+                    GROUP BY Customer, d.Name, c.Name
+                    ORDER BY Customer, d.Name, c.Name
+            </request>
+            <group step="1">
+                <field col="0" name="Customer" header="no" row="1" width="5000" stylename="Fields"/>
+                <field col="1" name="Media" header="no" row="1" width="7000" stylename="Fields"/>
+                <field col="2" name="Genre" header="no" row="1" width="5000" stylename="Fields"/>
+                <field col="3" name="Money" header="no" row="1" format="0.00" stylename="Fields"/>
+                <field col="4" name="Discount" header="no" row="1" format="0.00" stylename="Fields"/>
+                <field col="5" name="Charged" header="no" row="1" format="0.00" stylename="Fields"/>
+            </group>
+        </sql>
+    </report>
+    <report>
+        <name>Playlist</name>
+        <literal col="0" row="0" stylename="Subheaders">Playlist</literal>
+        <literal col="1" row="0" stylename="Subheaders">Album</literal>
+        <literal col="2" row="0" stylename="Subheaders">Track</literal>
+        <literal col="3" row="0" stylename="Subheaders">Milliseconds</literal>
+        <literal col="4" row="0" stylename="Subheaders">Bytes</literal>
+        <literal col="5" row="0" stylename="Subheaders">Price</literal>
+        <sql>
+            <request suppress="Playlist, Album" skip="2" skip_totals="2" subtotal="Milliseconds, Bytes, Price" total="Milliseconds, Bytes, Price">
+                SELECT DISTINCT b.Name AS Playlist, d.Title AS Album, c.Name AS Track,
+                       c.Milliseconds, c.Bytes, c.UnitPrice AS Price
+                    FROM PlaylistTrack as a JOIN Playlist as b ON (b.PlaylistId=a.PlaylistId) JOIN
+                         Track as c ON (c.TrackId=a.TrackId) JOIN Album as d ON (d.AlbumId=c.AlbumId)
+                    ORDER BY b.Name, d.Title, c.Name
+            </request>
+            <group step="1">
+                <field col="0" name="Playlist" header="no" row="1" width="5900" stylename="Fields"/>
+                <field col="1" name="Album" header="no" row="1" width="20500" stylename="Fields"/>
+                <field col="2" name="Track" header="no" row="1" width="20000" stylename="Fields"/>
+                <field col="3" name="Milliseconds" header="no" row="1" width="5000" stylename="Fields"/>
+                <field col="4" name="Bytes" header="no" row="1" width="5000" stylename="Fields"/>
+                <field col="5" name="Price" header="no" row="1" width="5000" format="0.00" stylename="Fields"/>
+            </group>
+        </sql>
+    </report>
+</book>
