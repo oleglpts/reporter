@@ -23,6 +23,9 @@ def xls(report_config):
         'cursor': cursor,
         'xml': '%s%s.xml' % (cmd_args.reports, cmd_args.name),
         'logger': logger,
+        'callback_url': cmd_args.callback_url,
+        'callback_token': cmd_args.token,
+        'callback_frequency': cmd_args.frequency,
         'parameters': {parm.split('=')[0]: parm.split('=')[1].replace(',', '') for parm in cmd_args.parameters}
     })
     report.to_file('%s.xls' % cmd_args.output)

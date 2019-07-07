@@ -194,7 +194,7 @@
                 <field col="2" name="Track" header="no" row="1" width="20000" stylename="Fields"/>
                 <field col="3" name="Milliseconds" header="no" row="1" width="5000" stylename="Fields"/>
                 <field col="4" name="Bytes" header="no" row="1" width="5000" stylename="Fields"/>
-                <field col="5" name="Price" header="no" row="1" width="5000" format="0.00" stylename="Fields"/>
+                <field col="5" name="Price" header="no" progress="yes" row="1" width="5000" format="0.00" stylename="Fields"/>
             </group>
         </sql>
     </report>
