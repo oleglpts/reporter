@@ -34,6 +34,8 @@ def main():
         form = report_config.get('format', 'csv')
         if cmd_args.database:
             report_config['connection'] = cmd_args.database
+        if cmd_args.sql:
+            report_config['sql'] = cmd_args.sql.split('|||')
         condition_code = getattr(importlib.import_module('db_report.formats.%s' % form), form)(report_config)
         file_path = '%s.%s' % (cmd_args.output, form)
         logger.info('%s \'%s\'' % (_('output file'), file_path))

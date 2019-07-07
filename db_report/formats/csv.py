@@ -1,4 +1,5 @@
 import os
+from db_report.utils.callback import callback
 from db_report.utils.helpers import database_connect
 from db_report.config import logger, cmd_args, translate as _
 
@@ -38,12 +39,19 @@ def csv(report_config):
             if description_string:
                 f.write(description_string[:-1])
                 f.write('\n')
-            for row in data:
+            length_data = len(data)
+            for i, row in enumerate(data):
                 data_string = ''
                 for column in row:
                     data_string += '%s%s' % (column, report_config.get('field_delimiter', ';'))
                 f.write(data_string[:-1])
                 f.write('\n')
+                if not (i + 1) % int(cmd_args.frequency):
+                    callback({'status': -1, 'progress_data': i + 1, 'message': 'In progress',
+                              'length_data': length_data})
+            if not sql.startswith('SKIP'):
+                callback({'status': -1, 'progress_data': length_data, 'message': 'In progress',
+                          'length_data': length_data})
     cursor.close()
     connect.close()
     return True
