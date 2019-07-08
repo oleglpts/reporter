@@ -19,6 +19,7 @@ parser.add_argument('-k', '--token', help='unique token for frontend', default='
 parser.add_argument('-b', '--callback_url', help='callback url', default='http://localhost:8080')
 parser.add_argument('-d', '--database', help='database connection string')
 parser.add_argument('-q', '--sql', help='sql statement')
+parser.add_argument('-e', '--headings', help='headings', nargs='*', default=[])
 parser.add_argument('-f', '--frequency', help='callback frequency', default=10)
 parser.add_argument('-l', '--log_level', help='logging level: CRITICAL, ERROR, WARNING, INFO, DEBUG or NOTSET',
                     default='INFO')

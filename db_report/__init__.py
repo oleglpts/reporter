@@ -15,6 +15,8 @@ def copy_config():
         'data/reports/test_sqlite3_xls.json': 'reports/test_sqlite3_xls.json',
         'data/reports/test_sqlite3_xls.xml': 'reports/test_sqlite3_xls.xml',
         'data/reports/test_xls.json': 'reports/test_xls.json',
+        'data/reports/test_tab.json': 'reports/test_tab.json',
+        'data/reports/test_json.json': 'reports/test_json.json',
         'data/reports/test_xls.xml': 'reports/test_xls.xml',
         'data/test/chinook.sqlite': 'test/chinook.sqlite',
         'test/test.sh': 'test.sh',
