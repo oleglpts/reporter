@@ -41,9 +41,11 @@ def tab(report_config):
         data_file = []
         if len(data_list):
             for i, columns in enumerate(columns_list):
-                while not data_list[i]:
+                while data_list and not data_list[i]:
                     data_file.append(['' for _x in range(max_row_len)])
                     data_list.pop(i)
+                if not data_list:
+                    data_file = []
                 if len(columns_list) > 1:
                     row_data = ['<b><u>%s</u></b>' % report_config['headings'][i]]
                     while len(row_data) < max_row_len:
@@ -55,6 +57,8 @@ def tab(report_config):
                     while len(row_data) < max_row_len:
                         row_data.append('')
                     data_file.append(row_data)
+                if not data_list:
+                    break
                 data_length = len(data_list[i])
                 for j, row in enumerate(data_list[i]):
                     row_data = []
