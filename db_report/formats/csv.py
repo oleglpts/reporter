@@ -35,7 +35,17 @@ def csv(report_config):
                     sql = sql.replace('{{%s}}' % parameter, parameters_list[parameter])
                 cursor.execute(sql)
                 data, description = cursor.fetchall(), cursor.description
-                f.write(report_config['headings'][i-skips])
+                title_found = False
+                title = 'title%s' % (i - skips)
+                for parm in cmd_args.parameters:
+                    if parm.startswith(title):
+                        title_found = True
+                        heading = parm.split('=')[1]
+                        if heading[-1] == ',':
+                            heading = heading[:-1]
+                        f.write(heading)
+                if not title_found:
+                    f.write(report_config['headings'][i-skips])
                 f.write('\n\n')
             description_string = ''
             for column_name in description:
