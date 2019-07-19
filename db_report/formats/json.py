@@ -28,7 +28,7 @@ def json(report_config):
                 sql = sql.replace('{{%s}}' % parameter, parameters_list[parameter])
             cursor.execute(sql)
             columns = [col[0] for col in cursor.description]
-            data = [dict(zip(columns, (str(y) if y != 'None' else '' for y in rw))) for rw in cursor.fetchall()]
+            data = [dict(zip(columns, (str(y) if y is not None else '' for y in rw))) for rw in cursor.fetchall()]
             data_list.append(data)
         f.write(json_lib.dumps(data_list, ensure_ascii=False, indent=4))
     return True

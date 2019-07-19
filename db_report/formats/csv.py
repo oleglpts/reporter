@@ -57,7 +57,7 @@ def csv(report_config):
             for j, row in enumerate(data):
                 data_string = ''
                 for column in row:
-                    if column == 'None':
+                    if column is None:
                         column = ''
                     data_string += '%s%s' % (column, report_config.get('field_delimiter', ';'))
                 f.write(data_string[:-1])
