@@ -34,7 +34,10 @@ def main():
         form = report_config.get('format', 'csv')
         if cmd_args.database:
             report_config['connection'] = cmd_args.database
-        if cmd_args.headings:
+        report_config['headings'] = [x[1] for x in sorted(
+            [[int(parm.split('=')[0][5:]), parm.split('=')[1]] for parm in cmd_args.parameters if
+             parm.split('=')[0].startswith('title')])]
+        if not report_config['headings'] and cmd_args.headings:
             report_config['headings'] = cmd_args.headings
         if cmd_args.sql:
             report_config['sql'] = cmd_args.sql.split('|||')
