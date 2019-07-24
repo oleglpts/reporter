@@ -62,13 +62,14 @@ def tab(report_config):
                     break
                 data_length = len(data_list[i])
                 for j, row in enumerate(data_list[i]):
-                    row_data = []
+                    suppress_enable, row_data = True, []
                     for k, column in enumerate(columns_list[i]):
                         if not row[column] or row[column] == 'None':
                             row[column] = ''
                         if row[column] != suppress_list[k]:
                             suppress_list[k] = row[column]
-                        elif k < suppress:
+                            suppress_enable = False
+                        elif k < suppress and suppress_enable:
                             row[column] = ''
                         row_data.append(row[column].split('/////')[0].strip())
                     while len(row_data) < max_row_len:

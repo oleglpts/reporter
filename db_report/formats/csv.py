@@ -57,13 +57,14 @@ def csv(report_config):
             length_data = len(data)
             suppress_list = [None] * len(description)
             for j, row in enumerate(data):
-                data_string = ''
+                suppress_enable, data_string = True, ''
                 for k, column in enumerate(row):
                     if not column or column == 'None':
                         column = ''
                     if column != suppress_list[k]:
                         suppress_list[k] = column
-                    elif k < suppress:
+                        suppress_enable = False
+                    elif k < suppress and suppress_enable:
                         column = ''
                     column = str(column).split('/////')[0].strip()
                     data_string += '%s%s' % (column, report_config.get('field_delimiter', ';'))
