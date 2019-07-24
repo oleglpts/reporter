@@ -16,7 +16,7 @@ def tab(report_config):
     :rtype: bool
 
     """
-    data_list, columns_list, = [], []
+    data_list, columns_list, suppress = [], [], report_config.get('suppress', 0)
     connect = database_connect(report_config['connection'].replace('~', os.getenv('HOME')), logger)
     cursor = connect.cursor()
     logger.info('%s tab-%s' % (_('working'), _('generator')))
@@ -46,6 +46,7 @@ def tab(report_config):
                     data_list.pop(i)
                 if not data_list:
                     data_file = []
+                suppress_list = [None] * max_row_len
                 if len(columns_list) > 1:
                     row_data = ['<b><u>%s</u></b>' % report_config['headings'][i]]
                     while len(row_data) < max_row_len:
@@ -62,8 +63,14 @@ def tab(report_config):
                 data_length = len(data_list[i])
                 for j, row in enumerate(data_list[i]):
                     row_data = []
-                    for column in columns_list[i]:
-                        row_data.append(row[column] if row[column] and row[column] != 'None' else "")
+                    for k, column in enumerate(columns_list[i]):
+                        if not row[column] or row[column] == 'None':
+                            row[column] = ''
+                        if row[column] != suppress_list[k]:
+                            suppress_list[k] = row[column]
+                        elif k < suppress:
+                            row[column] = ''
+                        row_data.append(row[column].split('/////')[0].strip())
                     while len(row_data) < max_row_len:
                         row_data.append('')
                     data_file.append(row_data)

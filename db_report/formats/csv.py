@@ -16,6 +16,7 @@ def csv(report_config):
 
     """
 
+    suppress = report_config.get('suppress', 0)
     connect = database_connect(report_config['connection'].replace('~', os.getenv('HOME')), logger)
     cursor = connect.cursor()
     logger.info('%s csv-%s' % (_('working'), _('generator')))
@@ -54,11 +55,17 @@ def csv(report_config):
                 f.write(description_string[:-1])
                 f.write('\n')
             length_data = len(data)
+            suppress_list = [None] * len(description)
             for j, row in enumerate(data):
                 data_string = ''
-                for column in row:
-                    if column is None:
+                for k, column in enumerate(row):
+                    if not column or column == 'None':
                         column = ''
+                    if column != suppress_list[k]:
+                        suppress_list[k] = column
+                    elif k < suppress:
+                        column = ''
+                    column = str(column).split('/////')[0].strip()
                     data_string += '%s%s' % (column, report_config.get('field_delimiter', ';'))
                 f.write(data_string[:-1])
                 f.write('\n')
