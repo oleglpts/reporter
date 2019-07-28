@@ -34,7 +34,7 @@ setup(name='db_report',
       python_requires='>=3',
       package_data={'db_report': ['data', 'test']},
       install_requires=[
-          'xls-report>=0.0.4',
+          'xls-report>=0.0.5',
           'bottle>=0.12.17',
           'pyodbc==4.0.26',
           'pycurl>=7.43.0.3',
