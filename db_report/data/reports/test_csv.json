@@ -6,6 +6,7 @@
         "SKIP=2",
         "SELECT b.name as Artist, a.Title as Album FROM Album a JOIN Artist b ON(b.ArtistId = a.ArtistId) WHERE Artist LIKE '%{{artist}}%' ORDER BY Artist, Title"
     ],
+    "suppress": 1,
     "headings": ["Invoices", "Albums"],
     "field_delimiter": ";",
     "string_delimiter": "\""

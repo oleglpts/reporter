@@ -61,7 +61,7 @@ def csv(report_config):
                 for k, column in enumerate(row):
                     if not column or column == 'None':
                         column = ''
-                    if column != suppress_list[k]:
+                    if suppress_list and column != suppress_list[k]:
                         suppress_list[k] = column
                         suppress_enable = False
                     elif k < suppress and suppress_enable:
