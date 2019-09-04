@@ -21,9 +21,12 @@ def json(report_config):
     logger.info('%s json-%s' % (_('working'), _('generator')))
     with open('%s.json' % cmd_args.output, 'w') as f:
         for sql in report_config['sql']:
-            parameters_list = {
-                parm.split('=')[0]: parm.split('=')[1].replace(',', '') for parm in cmd_args.parameters
-            }
+            parameters_list = {}
+            for parm in cmd_args.parameters:
+                p = parm.split('=')
+                if p[1].endswith(','):
+                    p[1] = p[1][:-1]
+                parameters_list[p[0]] = p[1]
             for parameter in parameters_list:
                 sql = sql.replace('{{%s}}' % parameter, parameters_list[parameter])
             cursor.execute(sql)

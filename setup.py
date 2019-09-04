@@ -10,7 +10,7 @@ class PostInstall(_install):
 
 
 setup(name='db_report',
-      version='0.0.5',
+      version='0.0.6',
       packages=['db_report', 'db_report.config', 'db_report.utils', 'db_report.formats'],
       url='https://github.com/oleglpts/reporter',
       license='MIT',

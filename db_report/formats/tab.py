@@ -27,9 +27,12 @@ def tab(report_config):
                 for _x in range(int(skip[1]) if len(skip) > 1 else 1):
                     data_list.append([])
             else:
-                parameters_list = {
-                    parm.split('=')[0]: parm.split('=')[1].replace(',', '') for parm in cmd_args.parameters
-                }
+                parameters_list = {}
+                for parm in cmd_args.parameters:
+                    p = parm.split('=')
+                    if p[1].endswith(','):
+                        p[1] = p[1][:-1]
+                    parameters_list[p[0]] = p[1]
                 for parameter in parameters_list:
                     sql = sql.replace('{{%s}}' % parameter, parameters_list[parameter])
                 cursor.execute(sql)
