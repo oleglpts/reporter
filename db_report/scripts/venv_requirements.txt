@@ -1,5 +1,5 @@
 bottle==0.12.17
-lxml==4.3.4
+lxml==4.6.3
 pip==19.0.3
 psycopg2==2.8.3
 pycurl==7.43.0.3
