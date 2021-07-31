@@ -1,4 +1,4 @@
-bottle==0.12.17
+bottle==0.12.19
 lxml==4.3.4
 pip==19.0.3
 psycopg2==2.8.3
