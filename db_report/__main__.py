@@ -5,6 +5,7 @@
 #
 # -n test_xls -p artist="Symphony Orchestra", title=Albums
 
+import os
 import sys
 import json
 import time
@@ -29,7 +30,8 @@ def main():
     logger.info('%s, %s: %s' % (_('reporter started'), _('logging level'), cmd_args.log_level))
     logger.info('%s \'%s\'' % (_('report name'), cmd_args.name))
     try:
-        with open('%s%s.json' % (cmd_args.reports, cmd_args.name), 'r') as config_file:
+        config = os.path.join(cmd_args.reports, cmd_args.name) + '.json'
+        with open(config, 'r') as config_file:
             report_config = json.load(config_file)
         form = report_config.get('format', 'csv')
         if cmd_args.database:

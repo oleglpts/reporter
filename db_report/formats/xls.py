@@ -27,7 +27,7 @@ def xls(report_config):
         parameters_list[p[0]] = p[1]
     report = XLSReport({
         'cursor': cursor,
-        'xml': '%s%s.xml' % (cmd_args.reports, cmd_args.name),
+        'xml': os.path.join(cmd_args.reports.replace('~', os.path.expanduser('~')), cmd_args.name) + '.xml',
         'logger': logger,
         'callback_url': cmd_args.callback_url,
         'callback_token': cmd_args.token,

@@ -17,13 +17,7 @@
         <literal col="3" row="0" stylename="Subheaders">Discount</literal>
         <literal col="4" row="0" stylename="Subheaders">Total</literal>
         <sql>
-            <request>
-                SELECT b.LastName, b.FirstName, round(sum(a.Total), 2), round(sum(a.Total)/50, 2)
-                    FROM Invoice AS a JOIN Customer AS b ON (b.CustomerId = a.CustomerId)
-                    WHERE b.LastName LIKE '%{{customer}}%'
-                    GROUP BY b.LastName, b.FirstName
-                    ORDER BY b.LastName, b.FirstName;
-            </request>
+            <request>[evaluate]~/.db_report/test/get_data_xls.py[/evaluate]</request>
             <group step="1">
                 <field col="0" name="Last name" header="no" row="1" stylename="Fields"/>
                 <field col="1" name="First name" header="no" row="1" stylename="Fields"/>

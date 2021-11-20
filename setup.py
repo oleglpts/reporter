@@ -10,7 +10,7 @@ class PostInstall(_install):
 
 
 setup(name='db_report',
-      version='0.0.6',
+      version='0.0.8',
       packages=['db_report', 'db_report.config', 'db_report.utils', 'db_report.formats'],
       url='https://github.com/oleglpts/reporter',
       license='MIT',
@@ -36,7 +36,7 @@ setup(name='db_report',
       install_requires=[
           'xls-report>=0.0.5',
           'bottle>=0.12.17',
-          'pyodbc==4.0.26',
+          'pyodbc>==4.0.26',
           'pycurl>=7.43.0.3',
           'psycopg2-binary>=2.9.1'
       ],

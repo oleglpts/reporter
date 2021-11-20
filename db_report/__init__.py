@@ -19,6 +19,10 @@ def copy_config():
         'data/reports/test_json.json': 'reports/test_json.json',
         'data/reports/test_xls.xml': 'reports/test_xls.xml',
         'data/test/chinook.sqlite': 'test/chinook.sqlite',
+        'data/test/get_data_xls.py': 'test/get_data_xls.py',
+        'data/test/get_data_csv.py': 'test/get_data_csv.py',
+        'data/test/get_data_tab.py': 'test/get_data_tab.py',
+        'data/test/get_data_json.py': 'test/get_data_json.py',
         'test/test.sh': 'test.sh',
         'test/test_clean.sh': 'test_clean.sh'
     }

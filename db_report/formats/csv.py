@@ -3,6 +3,8 @@ from db_report.utils.callback import callback
 from db_report.utils.helpers import database_connect
 from db_report.config import logger, cmd_args, translate as _
 
+data, description = None, None
+
 
 def csv(report_config):
     """
@@ -15,6 +17,7 @@ def csv(report_config):
     :rtype: bool
 
     """
+    global data, description
 
     suppress = report_config.get('suppress', 0)
     connect = database_connect(report_config['connection'].replace('~', os.getenv('HOME')), logger)
@@ -35,10 +38,20 @@ def csv(report_config):
                     if p[1].endswith(','):
                         p[1] = p[1][:-1]
                     parameters_list[p[0]] = p[1]
-                for parameter in parameters_list:
-                    sql = sql.replace('{{%s}}' % parameter, parameters_list[parameter])
-                cursor.execute(sql)
-                data, description = cursor.fetchall(), cursor.description
+                if sql.startswith('[evaluate]'):
+                    sql = sql.split('[evaluate]')[1].split('[/evaluate]')[0].strip()
+                    try:
+                        with open(sql.replace('~', os.path.expanduser('~'))) as request_file:
+                            code = compile(request_file.read(), sql, 'exec')
+                            exec(code, globals(), locals())
+                    except FileNotFoundError:
+                        logger.error('file \'%s\' not found' % sql)
+                        raise RuntimeError('file \'%s\' not found' % sql)
+                else:
+                    for parameter in parameters_list:
+                        sql = sql.replace('{{%s}}' % parameter, parameters_list[parameter])
+                    cursor.execute(sql)
+                    data, description = cursor.fetchall(), cursor.description
                 title_found = False
                 title = 'title%s' % (i - skips)
                 for parm in cmd_args.parameters:
