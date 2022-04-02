@@ -1,16 +1,26 @@
 from setuptools import setup
+from setuptools.command.develop import develop
 from setuptools.command.install import install as _install
 
 
-class PostInstall(_install):
+class PostDevelopCommand(develop):
+    """Post-installation for development mode."""
     def run(self):
+        develop.run(self)
         import db_report
         db_report.copy_config()
-        super(PostInstall, self).run()
+
+
+class PostInstallCommand(_install):
+    """Post-installation for installation mode."""
+    def run(self):
+        _install.run(self)
+        import db_report
+        db_report.copy_config()
 
 
 setup(name='db_report',
-      version='0.0.8',
+      version='0.0.9',
       packages=['db_report', 'db_report.config', 'db_report.utils', 'db_report.formats'],
       url='https://github.com/oleglpts/reporter',
       license='MIT',
@@ -32,7 +42,17 @@ setup(name='db_report',
           ]
       },
       python_requires='>=3',
-      package_data={'db_report': ['data', 'test']},
+      package_data={
+          'db_report': [
+              'data/*',
+              'data/locale/ru/LC_MESSAGES/*',
+              'data/locale/en/LC_MESSAGES/*',
+              'data/reports/*',
+              'data/test/*',
+              'test/*'
+          ]
+      },
+      include_package_data=True,
       install_requires=[
           'xls-report>=0.0.5',
           'bottle>=0.12.17',
@@ -40,4 +60,7 @@ setup(name='db_report',
           'pycurl>=7.43.0.3',
           'psycopg2-binary>=2.9.1'
       ],
-      cmdclass={'install': PostInstall})
+      cmdclass={
+          'develop': PostDevelopCommand,
+          'install': PostInstallCommand,
+      })
