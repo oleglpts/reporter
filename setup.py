@@ -56,7 +56,7 @@ setup(name='db_report',
       install_requires=[
           'xls-report>=0.0.5',
           'bottle>=0.12.17',
-          'pyodbc>==4.0.26',
+          'pyodbc>=4.0.26',
           'pycurl>=7.43.0.3',
           'psycopg2-binary>=2.9.1'
       ],
