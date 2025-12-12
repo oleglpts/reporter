@@ -1,6 +1,5 @@
 import os
 import pathlib
-from pkg_resources import resource_string
 
 
 def copy_config():
@@ -27,7 +26,6 @@ def copy_config():
         'test/test_clean.sh': 'test_clean.sh'
     }
     for file_name in files:
-        path = pathlib.Path('%s/.db_report' % os.getenv('HOME'), files[file_name])
+        path = pathlib.Path(os.getenv('HOME'), '.' + __name__, files[file_name])
         path.parent.mkdir(parents=True, exist_ok=True)
-        text = resource_string(__name__, file_name)
-        open(str(path), 'wb').write(text)
+        open(str(path), 'wb').write(open(pathlib.Path(__name__, file_name), 'rb').read())
